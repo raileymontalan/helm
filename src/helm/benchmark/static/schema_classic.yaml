@@ -1531,6 +1531,21 @@ run_groups:
       when: "?"
       language: English
 
+  - name: uit_vsfc_sa
+    display_name: uit_vsfc_sa
+    description: The UIT-VSFC benchmark for sentiment analysis.
+    metric_groups:
+      - accuracy
+    environment:
+      main_name: quasi_exact_match
+      main_split: train
+    taxonomy:
+      task: sentiment analysis
+      what: student feedback
+      who: "Vietnamese students"
+      when: "?"
+      language: Vietnamese
+
 # Text classification scenarios
   - name: raft
     display_name: RAFT (Real-world Annotated Few-Shot)
