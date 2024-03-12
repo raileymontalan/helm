@@ -1,8 +1,8 @@
 import random, os
 from typing import List
 
+from .scenario import Scenario, Instance, Reference, TRAIN_SPLIT, VALID_SPLIT, TEST_SPLIT, CORRECT_TAG, Input, Output
 from helm.common.general import ensure_file_downloaded
-from scenario import Scenario, Instance, Reference, TRAIN_SPLIT, VALID_SPLIT, TEST_SPLIT, CORRECT_TAG, Input, Output
 
 
 class UITVSFCSentimentAnalysisScenario(Scenario):
@@ -59,29 +59,25 @@ class UITVSFCSentimentAnalysisScenario(Scenario):
 
         data = {}
         for split in list(URLS.keys()):
+            data[split] = {}
             for file in list(URLS[split].keys()):
-                target_path_file = os.path.join(output_path, split, str(file + '.txt'))
+                data[split][file] = []
+                target_path_file = os.path.join(output_path, split, file)
                 ensure_file_downloaded(source_url=URLS[split][file], target_path=target_path_file)
                 with open(target_path_file, 'r') as f:
-                    data[split][file] = f.readlines()
+                    lines = f.readlines()
+                    for line in lines:
+                        data[split][file].append(line)
         return data
-    
-    def generate_instance(self, split, data):
-        input = Input(data['sentence'])
-        references = [Reference(Output(text=data['sentiment']), tags=[CORRECT_TAG])]
-        return Instance(Input(text=input), references=references, split=self.splits[split]) 
-                
+
     def get_instances(self, output_path) -> List[Instance]:
 
         data = self.download_dataset(output_path)
         output = []
         for split in list(data.keys()):
-            output += [self.generate_instance(split, data[split])]
-        
+            for i, r in zip(data[split]['sentences'], data[split]['sentences']):
+                input = Input(i)
+                references = [Reference(Output(text=r), tags=[CORRECT_TAG])]
+                instance = Instance(input, references=references, split=self.splits[split])
+                output.append(instance)
         return output
-
-
-if __name__ == "__main__":
-    print("DOWNLOADING")
-    scenario = UITVSFCSentimentAnalysisScenario()
-    scenario.download_dataset('data')
