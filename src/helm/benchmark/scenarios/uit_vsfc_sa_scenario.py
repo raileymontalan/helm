@@ -40,6 +40,17 @@ class UITVSFCSentimentAnalysisScenario(Scenario):
             'valid': VALID_SPLIT,
             'test': TEST_SPLIT
         }
+        self.id2label = {
+            0: 'positive',
+            1: 'negative',
+            2: 'neutral',
+        }
+
+        self.label2id = {
+            'positive': 0,
+            'negative': 1,
+            'neutral': 2,
+        }
 
     def download_dataset(self, output_path: str):
         URLS = {
@@ -71,13 +82,15 @@ class UITVSFCSentimentAnalysisScenario(Scenario):
         return data
 
     def get_instances(self, output_path) -> List[Instance]:
-
         data = self.download_dataset(output_path)
         output = []
         for split in list(data.keys()):
-            for i, r in zip(data[split]['sentences'], data[split]['sentences']):
+            for i, r in zip(data[split]['sentences'], data[split]['sentiments']):
                 input = Input(i)
-                references = [Reference(Output(text=r), tags=[CORRECT_TAG])]
+                reference = Output(text=self.id2label[int(r)])
+                references = [
+                    Reference(reference, tags=[CORRECT_TAG]),
+                ]
                 instance = Instance(input, references=references, split=self.splits[split])
                 output.append(instance)
         return output
