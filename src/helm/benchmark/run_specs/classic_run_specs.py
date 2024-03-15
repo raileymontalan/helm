@@ -1461,19 +1461,3 @@ def get_lm_entry_spec(task: str, method: str = ADAPT_GENERATION) -> RunSpec:
         metric_specs=metric_specs,
         groups=["lm_entry"],
     )
-
-@run_spec_function("uit_vsfc_sa")
-def get_uit_vsfc_sa_spec() -> RunSpec:
-    scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.uit_vsfc_sa_scenario.UITVSFCSentimentAnalysisScenario"
-    )
-
-    adapter_spec = get_generation_adapter_spec(input_noun="Passage", output_noun="Sentiment")
-
-    return RunSpec(
-        name="uit_vsfc_sa",
-        scenario_spec=scenario_spec,
-        adapter_spec=adapter_spec,
-        metric_specs=get_exact_match_metric_specs() + get_classification_metric_specs(),
-        groups=["uit_vsfc_sa"],
-    )
