@@ -410,24 +410,49 @@ class MLHSD_ID_TD_Scenario(Scenario):
             'test': TEST_SPLIT
         }
 
-    def get_instances(self, output_path) -> List[Instance]:
-        dataset = datasets.load_dataset("xquad", "xquad.vi")
-        dataset = dataset['validation'].train_test_split(test_size=0.8)
+        self.id2label = {
+            0: 'CLEAN',
+            1: 'OFFENSIVE',
+            2: 'HATE',
+        }
 
+        self.label2id = {
+            'CLEAN': 0,
+            'OFFENSIVE': 1,
+            'HATE': 2,
+        }
+
+    def download_dataset(self, output_path: str):
+        URL = "https://raw.githubusercontent.com/okkyibrohim/id-multi-label-hate-speech-and-abusive-language-detection/master/re_dataset.csv"
+        target_path_file = os.path.join(output_path, "mlhsd")
+        ensure_file_downloaded(source_url=URL, target_path=target_path_file)
+        df = pd.read_csv(target_path_file, encoding="ISO-8859-1")
+
+        split_index = int(len(df)*0.8)
+        data = {}
+        data['train'] = df.iloc[:split_index]
+        data['test'] = df.iloc[split_index:]
+        return data
+    
+    def get_label(self, row) -> int:
+        if int(row["HS"]) == 0:
+            return self.id2label[int(row["Abusive"])]
+        else: 
+            return self.id2label[int(row["HS"])]
+
+    def get_instances(self, output_path) -> List[Instance]:
+        data = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
-            for index, row in data.iterrows():
-                passage = row["context"]
-                question = row["question"]
-                input = Input(passage=passage)
-                output = Output(text=row["answers"]["text"][0])
+        for split in list(data.keys()):
+            for index, row in data[split].iterrows():
+                input = Input(row["Tweet"])
+                output = Output(text=self.get_label(row))
                 references = [
                     Reference(output, tags=[CORRECT_TAG]),
                 ]
                 instance = Instance(
                     input=input,
-                    references=references, 
+                    references=references,
                     split=self.splits[split]
                 )
                 outputs.append(instance)
@@ -472,6 +497,7 @@ class ViHSD_VI_TD_Scenario(Scenario):
             'dev': VALID_SPLIT,
             'test': TEST_SPLIT
         }
+
         self.id2label = {
             0: 'CLEAN',
             1: 'OFFENSIVE',
