@@ -40,8 +40,8 @@ from helm.benchmark.scenarios.scenario import ScenarioSpec, get_scenario_cache_p
 from helm.common.hierarchical_logger import hlog, htrack
 
 # NLU
-@run_spec_function("xquad_vi_qa")
-def get_xquad_vi_qa_spec() -> RunSpec:
+@run_spec_function("xquad_vi_qa_zeroshot")
+def get_xquad_vi_qa_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_VI_QA_Scenario"
     )
@@ -49,19 +49,19 @@ def get_xquad_vi_qa_spec() -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="Bạn sẽ được cho một đoạn văn và một câu hỏi.\nTrả lời câu hỏi bằng cách trích xuất câu trả lời từ đoạn văn.",
         output_noun="Câu trả lời",
-        max_train_instances=5,
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="xquad_vi_qa",
+        name="xquad_vi_qa_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("xquad_th_qa")
-def get_xquad_th_qa_spec() -> RunSpec:
+@run_spec_function("xquad_th_qa_zeroshot")
+def get_xquad_th_qa_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_TH_QA_Scenario"
     )
@@ -69,82 +69,79 @@ def get_xquad_th_qa_spec() -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="คุณจะได้รับข้อความและคําถาม กรุณาตอบคําถาม\nโดยแยกคําตอบจากข้อความ",
         output_noun="คําตอบ",
-        max_train_instances=5,
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="xquad_th_qa",
+        name="xquad_th_qa_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("uit_vsfc_vi_sa")
-def get_uit_vsfc_vi_sa_spec() -> RunSpec:
+@run_spec_function("uit_vsfc_vi_sa_zeroshot")
+def get_uit_vsfc_vi_sa_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.UIT_VSFC_VI_SA_Scenario"
     )
 
-    adapter_spec = get_generation_adapter_spec(
-        instructions="Sắc thái của câu sau đây là gì?\nTrả lời với một từ duy nhất: Tích cực/Tiêu cực/Trung lập",
-        input_noun="Câu",
-        output_noun="Câu trả lời",
-        max_train_instances=5,
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="Sắc thái của câu sau đây là gì? ",
+        output_prefix="\nTrả lời với một từ duy nhất: Tích cực/Tiêu cực/Trung lập\n",
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="uit_vsfc_vi_sa",
+        name="uit_vsfc_vi_sa_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("nusax_id_sa")
-def get_nusax_id_sa_spec() -> RunSpec:
+@run_spec_function("nusax_id_sa_zeroshot")
+def get_nusax_id_sa_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.NusaX_ID_SA_Scenario"
     )
 
-    adapter_spec = get_generation_adapter_spec(
-        instructions="Apa sentimen dari kalimat berikut ini?\nJawab dengan satu kata saja: Positif/Negatif/Netral",
-        input_noun="Kalimat",
-        output_noun="Jawaban",
-        max_train_instances=5,
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="Apa sentimen dari kalimat berikut ini? ",
+        output_prefix="\nJawab dengan satu kata saja: Positif/Negatif/Netral\n",
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="nusax_id_sa",
+        name="nusax_id_sa_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("indicsentiment_ta_sa")
-def get_indicsentiment_ta_sa_spec() -> RunSpec:
+@run_spec_function("indicsentiment_ta_sa_zeroshot")
+def get_indicsentiment_ta_sa_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.IndicSentiment_TA_SA_Scenario"
     )
 
-    adapter_spec = get_generation_adapter_spec(
-        instructions="உங் களுக் கு ஒரு பத் தியும் ஒரு ேகள் வியும் தரப் படும். தரப் பட் ட பத் தியிலிருந் து ேகள் விக் கான பதிைலக் கண் டறBயவும்.  ேகள் விக் குப் பதிலளிக் கமுடியாவிட் டால் ஒற் ைற எழுத் து X இைனப் பதிலாக அளிக் கவும்.",
-        input_noun="உைர",
-        output_noun="பதில்",
-        max_train_instances=5,
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="பின் வரும் வாக் கியத் தில் ெவளிப் படுத் தப் படும் உணர் வு எது? ",
+        output_prefix="\nஒரு ெசால் லில் மட் டும் பதிலளிக் கவும்:  ேநர் மைற/எதிர் மைற\n",
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="indicsentiment_ta_sa",
+        name="indicsentiment_ta_sa_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_exact_match_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("mlhsd_id_td")
-def get_mlhsd_id_td_spec() -> RunSpec:
+@run_spec_function("mlhsd_id_td_zeroshot")
+def get_mlhsd_id_td_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.MLHSD_ID_TD_Scenario"
     )
@@ -152,19 +149,19 @@ def get_mlhsd_id_td_spec() -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="Anda adalah pendeteksi ujaran kebencian.\nDefinisi dari labelnya adalah sebagai berikut:\nBersih: Tidak ada ujaran kebencian\nKasar: Ada ujaran kebencian dan kata-kata kasar,namun tidak menyerang pihak tertentu\nBenci: Ada ujaran kebencian langsung atau serangan terhadap pihak tertentu\nKetika diberikan sebuah kalimat, klasifikasikan dengan satu kata:\nBersih/Kasar/Benci",
         input_noun="Kalimat",
-        max_train_instances=5,
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="mlhsd_id_td",
+        name="mlhsd_id_td_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("vihsd_vi_td")
-def get_vihsd_vi_td_spec() -> RunSpec:
+@run_spec_function("vihsd_vi_td_zeroshot")
+def get_vihsd_vi_td_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.ViHSD_VI_TD_Scenario"
     )
@@ -172,19 +169,19 @@ def get_vihsd_vi_td_spec() -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="Bạn là máy phát hiện phát ngôn thù ghét.\nCác nhãn được định nghĩa như sau:\nSạch: Không quấy rối\nCông kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào\nThù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể\nCho câu dưới đây, hãy phân loại nó với 1 từ duy nhất:\nSạch/Công kích/Thù ghét",
         input_noun="Câu",
-        max_train_instances=5,
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="vihsd_vi_td",
+        name="vihsd_vi_td_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("thai_toxicity_tweets_th_td")
-def get_thai_toxicity_tweets_th_td_spec() -> RunSpec:
+@run_spec_function("thai_toxicity_tweets_th_td_zeroshot")
+def get_thai_toxicity_tweets_th_td_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.Thai_Toxicity_Tweets_TH_TD_Scenario"
     )
@@ -192,11 +189,11 @@ def get_thai_toxicity_tweets_th_td_spec() -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ\nข้อความเป็นพิษถ้ามันทําร้าย\nสร้างความเสียหายหรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล\nคุณควรคํานึงถึงการประชดประชันด้วย\nเมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ",
         input_noun="ข้อความ",
-        max_train_instances=5,
+        max_train_instances=0,
     )
 
     return RunSpec(
-        name="thai_toxicity_tweets_th_td",
+        name="thai_toxicity_tweets_th_td_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),

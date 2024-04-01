@@ -330,6 +330,12 @@ tokenizer_configs:
     prefix_token: "</s>"
 
   # AI Singapore SEA-LION
+  - name: aisingapore/sealion-bert-large
+    tokenizer_spec:
+      class_name: "helm.tokenizers.aisingapore_tokenizer.AISingaporeTokenizer"
+    end_of_text_token: "<|eos|>"
+    prefix_token: "<|bos|>"
+
   - name: aisingapore/sea-lion-3b
     tokenizer_spec:
       class_name: "helm.tokenizers.aisingapore_tokenizer.AISingaporeTokenizer"
