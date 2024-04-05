@@ -40,10 +40,10 @@ from helm.benchmark.scenarios.scenario import ScenarioSpec, get_scenario_cache_p
 from helm.common.hierarchical_logger import hlog, htrack
 
 # NLU
-@run_spec_function("xquad_vi_qa_zeroshot")
-def get_xquad_vi_qa_zeroshot_spec() -> RunSpec:
+@run_spec_function("xquad_qa_vi_zeroshot")
+def get_xquad_qa_vi_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_VI_QA_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_QA_VI_Scenario"
     )
 
     adapter_spec = get_generation_adapter_spec(
@@ -53,17 +53,17 @@ def get_xquad_vi_qa_zeroshot_spec() -> RunSpec:
     )
 
     return RunSpec(
-        name="xquad_vi_qa_zeroshot",
+        name="xquad_qa_vi_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("xquad_th_qa_zeroshot")
-def get_xquad_th_qa_zeroshot_spec() -> RunSpec:
+@run_spec_function("xquad_qa_th_zeroshot")
+def get_xquad_qa_th_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_TH_QA_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_QA_TH_Scenario"
     )
 
     adapter_spec = get_generation_adapter_spec(
@@ -73,77 +73,77 @@ def get_xquad_th_qa_zeroshot_spec() -> RunSpec:
     )
 
     return RunSpec(
-        name="xquad_th_qa_zeroshot",
+        name="xquad_qa_th_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("uit_vsfc_vi_sa_zeroshot")
-def get_uit_vsfc_vi_sa_zeroshot_spec() -> RunSpec:
+@run_spec_function("uit_vsfc_sa_vi_zeroshot")
+def get_uit_vsfc_sa_vi_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.UIT_VSFC_VI_SA_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.UIT_VSFC_SA_VI_Scenario"
     )
 
     adapter_spec = get_completion_adapter_spec(
-        input_prefix="Sắc thái của câu sau đây là gì? ",
-        output_prefix="\nTrả lời với một từ duy nhất: Tích cực/Tiêu cực/Trung lập\n",
+        input_prefix="Sắc thái của câu sau đây là gì?\nCâu: ",
+        output_prefix="\nTrả lời với một từ duy nhất: Tích cực/Tiêu cực/Trung lập\nCâu trả lời: ",
         max_train_instances=0,
     )
 
     return RunSpec(
-        name="uit_vsfc_vi_sa_zeroshot",
+        name="uit_vsfc_sa_vi_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("nusax_id_sa_zeroshot")
-def get_nusax_id_sa_zeroshot_spec() -> RunSpec:
+@run_spec_function("nusax_sa_id_zeroshot")
+def get_nusax_sa_id_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.NusaX_ID_SA_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.NusaX_SA_ID_Scenario"
     )
 
     adapter_spec = get_completion_adapter_spec(
-        input_prefix="Apa sentimen dari kalimat berikut ini? ",
-        output_prefix="\nJawab dengan satu kata saja: Positif/Negatif/Netral\n",
+        input_prefix="Apa sentimen dari kalimat berikut ini? Kalimat: ",
+        output_prefix="\nJawab dengan satu kata saja: Positif/Negatif/Netral\nJawaban: ",
         max_train_instances=0,
     )
 
     return RunSpec(
-        name="nusax_id_sa_zeroshot",
+        name="nusax_sa_id_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("indicsentiment_ta_sa_zeroshot")
-def get_indicsentiment_ta_sa_zeroshot_spec() -> RunSpec:
+@run_spec_function("indicsentiment_sa_ta_zeroshot")
+def get_indicsentiment_sa_ta_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.IndicSentiment_TA_SA_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.IndicSentiment_SA_TA_Scenario"
     )
 
     adapter_spec = get_completion_adapter_spec(
-        input_prefix="பின் வரும் வாக் கியத் தில் ெவளிப் படுத் தப் படும் உணர் வு எது? ",
-        output_prefix="\nஒரு ெசால் லில் மட் டும் பதிலளிக் கவும்:  ேநர் மைற/எதிர் மைற\n",
+        input_prefix="பின்வரும் வாக்கியத்தில் வெளிப்படுத்தப்படும் உணர்வு எது? வாக்கியம்: ",
+        output_prefix="\nஒரு சொல்லில் மட்டும் பதிலளிக்கவும்:\n- நேர்மறை\n- எதிர்மறை\nபதில்: ",
         max_train_instances=0,
     )
 
     return RunSpec(
-        name="indicsentiment_ta_sa_zeroshot",
+        name="indicsentiment_sa_ta_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_exact_match_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("mlhsd_id_td_zeroshot")
-def get_mlhsd_id_td_zeroshot_spec() -> RunSpec:
+@run_spec_function("mlhsd_td_id_zeroshot")
+def get_mlhsd_td_id_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.MLHSD_ID_TD_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.MLHSD_TD_ID_Scenario"
     )
 
     adapter_spec = get_generation_adapter_spec(
@@ -153,17 +153,17 @@ def get_mlhsd_id_td_zeroshot_spec() -> RunSpec:
     )
 
     return RunSpec(
-        name="mlhsd_id_td_zeroshot",
+        name="mlhsd_td_id_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("vihsd_vi_td_zeroshot")
-def get_vihsd_vi_td_zeroshot_spec() -> RunSpec:
+@run_spec_function("vihsd_td_vi_zeroshot")
+def get_vihsd_td_vi_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.ViHSD_VI_TD_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.ViHSD_TD_VI_Scenario"
     )
 
     adapter_spec = get_generation_adapter_spec(
@@ -173,17 +173,17 @@ def get_vihsd_vi_td_zeroshot_spec() -> RunSpec:
     )
 
     return RunSpec(
-        name="vihsd_vi_td_zeroshot",
+        name="vihsd_td_vi_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("thai_toxicity_tweets_th_td_zeroshot")
-def get_thai_toxicity_tweets_th_td_zeroshot_spec() -> RunSpec:
+@run_spec_function("thai_toxicity_tweets_td_th_zeroshot")
+def get_thai_toxicity_tweets_td_th_zeroshot_spec() -> RunSpec:
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.Thai_Toxicity_Tweets_TH_TD_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.Thai_Toxicity_Tweets_TD_TH_Scenario"
     )
 
     adapter_spec = get_generation_adapter_spec(
@@ -193,7 +193,7 @@ def get_thai_toxicity_tweets_th_td_zeroshot_spec() -> RunSpec:
     )
 
     return RunSpec(
-        name="thai_toxicity_tweets_th_td_zeroshot",
+        name="thai_toxicity_tweets_td_th_zeroshot",
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
         metric_specs=get_f1_metric_specs(),
@@ -205,4 +205,86 @@ def get_thai_toxicity_tweets_th_td_zeroshot_spec() -> RunSpec:
 
 # NLR
 
+@run_spec_function("indonli_nli_id_zeroshot")
+def get_indonli_nli_id_zeroshot_spec() -> RunSpec:
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.IndoNLI_NLI_ID_Scenario"
+    )
+
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="Anda akan diberikan dua kalimat, X dan Y.\n",
+        output_prefix="\nTentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah hanya dengan menggunakan satu huruf A, B atau C.\nJawaban: ",
+        max_train_instances=0,
+    )
+
+    return RunSpec(
+        name="indonli_nli_id_zeroshot",
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_f1_metric_specs(),
+        groups=["bhasa_nlu"],
+    )
+
+@run_spec_function("xnli_nli_vi_zeroshot")
+def get_xnli_nli_vi_zeroshot_spec() -> RunSpec:
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XNLI_NLI_VI_Scenario"
+    )
+
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="Bạn sẽ được cho hai câu, X và Y.\n",
+        output_prefix="\nXác định câu nào sau đây là câu phù hợp nhất cho câu X và Y.\nA: Nếu X đúng thì Y phải đúng.\nB: X mâu thuẫn với Y.\nC: Khi X đúng, Y có thể đúng hoặc không đúng.\nTrả lời với một chữ cái duy nhất A, B, hoặc C.\nCâu trả lời: ",
+        max_train_instances=0,
+    )
+
+    return RunSpec(
+        name="xnli_nli_vi_zeroshot",
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_f1_metric_specs(),
+        groups=["bhasa_nlu"],
+    )
+
+@run_spec_function("xnli_nli_th_zeroshot")
+def get_xnli_nli_th_zeroshot_spec() -> RunSpec:
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XNLI_NLI_TH_Scenario"
+    )
+
+    adapter_spec = get_completion_adapter_spec(
+        input_prefix="คุณจะได้รับสองข้อความ X และ Y\n",
+        output_prefix="\nกรุณาพิจารณาว่า ข้อความใดต่อไปนี้ใช้กับข้อความ X และ Y ได้ดีที่สุด\nA: ถ้า X เป็นจริง Y จะต้องเป็นจริง\nB: X ขัดแย้งกับ Y\nC: เมื่อ X เป็นจริง Y อาจเป็นจริงหรือไม่ก็ได้\nกรุณาตอบด้วยตัวอักษร A, B หรือ C ตัวเดียวเท่านั้น\nคำตอบ: ",
+        max_train_instances=0,
+    )
+
+    return RunSpec(
+        name="xnli_nli_th_zeroshot",
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_f1_metric_specs(),
+        groups=["bhasa_nlu"],
+    )
+
 # LD
+
+@run_spec_function("lindsea_mp_id_zeroshot")
+def get_lindsea_mp_id_zeroshot_spec() -> RunSpec:
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_MP_ID_Scenario"
+    )
+
+    adapter_spec = get_multiple_choice_adapter_spec(
+        method=ADAPT_MULTIPLE_CHOICE_SEPARATE_ORIGINAL,
+        instructions="System Prompt:\nAnda adalah seorang ahli bahasa Indonesia\nHuman Prompt:Kalimat mana yang lebih mungkin?",
+        input_noun=None,
+        output_noun="Jawablah dengan menggunakan A atau B saja.",
+        max_train_instances=0,
+    )
+
+    return RunSpec(
+        name="lindsea_mp_id_zeroshot",
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_exact_match_metric_specs(),
+        groups=["bhasa_ld"],
+    )
