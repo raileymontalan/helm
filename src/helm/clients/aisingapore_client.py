@@ -18,7 +18,7 @@ from helm.common.request import (
     Token,
 )
 from .client import CachingClient, truncate_sequence
-from helm.tokenizers.huggingface_tokenizer import HuggingFaceTokenizer, WrappedPreTrainedTokenizer, resolve_alias
+from helm.tokenizers.aisingapore_tokenizer import AISingaporeTokenizer, WrappedPreTrainedTokenizer
 from threading import Lock
 
 
@@ -36,7 +36,7 @@ class StopAtSpecificTokenCriteria(StoppingCriteria):
         return bool(torch.all(current_sequence == stop_sequence_tensor).item())
 
 
-class HuggingFaceRequest(TypedDict):
+class AISingaporeRequest(TypedDict):
     """Data passed between make_request and serve_request. Used as the cache key."""
 
     engine: str
@@ -50,8 +50,8 @@ class HuggingFaceRequest(TypedDict):
     stop_sequences: List
 
 
-class HuggingFaceServer:
-    """A thin wrapper around a Hugging Face AutoModelForCausalLM for HuggingFaceClient to call."""
+class AISingaporeServer:
+    """A thin wrapper around a Hugging Face AutoModelForCausalLM for AISingaporeClient to call."""
 
     def __init__(self, pretrained_model_name_or_path: str, **kwargs):
         if torch.cuda.is_available():
@@ -62,14 +62,14 @@ class HuggingFaceServer:
         with htrack_block(f"Loading Hugging Face model {pretrained_model_name_or_path}"):
             # WARNING this may fail if your GPU does not have enough memory
             self.model = AutoModelForCausalLM.from_pretrained(
-                pretrained_model_name_or_path, trust_remote_code=True, **kwargs
+                pretrained_model_name_or_path, trust_remote_code=True, revision="refactor_files", **kwargs
             ).to(self.device)
         with htrack_block(f"Loading Hugging Face tokenizer for model {pretrained_model_name_or_path}"):
-            self.wrapped_tokenizer: WrappedPreTrainedTokenizer = HuggingFaceTokenizer.create_tokenizer(
+            self.wrapped_tokenizer: WrappedPreTrainedTokenizer = AISingaporeTokenizer.create_tokenizer(
                 pretrained_model_name_or_path, **kwargs
             )
 
-    def serve_request(self, raw_request: HuggingFaceRequest) -> Dict:
+    def serve_request(self, raw_request: AISingaporeRequest) -> Dict:
         with self.wrapped_tokenizer as tokenizer:
             encoded_input = tokenizer(raw_request["prompt"], return_tensors="pt", return_token_type_ids=False).to(
                 self.device
@@ -95,7 +95,7 @@ class HuggingFaceServer:
             and raw_request["echo_prompt"]
         )
 
-        # Use HuggingFace's `generate` method.
+        # Use AISingapore's `generate` method.
         if compute_logprobs_only:
             with torch.no_grad():
                 output = self.model(encoded_input["input_ids"])
@@ -163,40 +163,40 @@ class HuggingFaceServer:
         return {"completions": completions, "input_length": len(encoded_input.input_ids[0])}
 
 
-class HuggingFaceServerFactory:
-    """A factory that creates and caches HuggingFaceServer objects."""
+class AISingaporeServerFactory:
+    """A factory that creates and caches AISingaporeServer objects."""
 
-    _servers: Dict[str, HuggingFaceServer] = {}
+    _servers: Dict[str, AISingaporeServer] = {}
     _servers_lock: Lock = Lock()
 
     @staticmethod
     def get_server(helm_model_name: str, pretrained_model_name_or_path: str, **kwargs) -> Any:
         """
-        Checks if the desired HuggingFaceModel is cached. Creates the HuggingFaceModel if it's not cached.
-        Returns the HuggingFaceModel.
+        Checks if the desired AISingaporeModel is cached. Creates the AISingaporeModel if it's not cached.
+        Returns the AISingaporeModel.
         """
-        with HuggingFaceServerFactory._servers_lock:
-            if helm_model_name not in HuggingFaceServerFactory._servers:
+        with AISingaporeServerFactory._servers_lock:
+            if helm_model_name not in AISingaporeServerFactory._servers:
                 with htrack_block(
                     f"Loading {pretrained_model_name_or_path} (kwargs={kwargs}) "
                     f"for HELM model {helm_model_name} with Hugging Face Transformers"
                 ):
-                    HuggingFaceServerFactory._servers[helm_model_name] = HuggingFaceServer(
+                    AISingaporeServerFactory._servers[helm_model_name] = AISingaporeServer(
                         pretrained_model_name_or_path, **kwargs
                     )
 
-        return HuggingFaceServerFactory._servers[helm_model_name]
+        return AISingaporeServerFactory._servers[helm_model_name]
 
 
 TORCH_DTYPE_KEY = "torch_dtype"
 TORCH_DTYPE_VALUE_PREFIX = "torch."
 
 
-def _process_huggingface_client_kwargs(raw_kwargs: Dict[str, Any]):
-    """Process the kwargs for HuggingFaceClient.
+def _process_aisingapore_client_kwargs(raw_kwargs: Dict[str, Any]):
+    """Process the kwargs for AISingaporeClient.
 
-    The kwargs passed to HuggingFaceClient will eventually be passed to AutoModel.from_pretrained().
-    Since the kwargs from HuggingFaceClient may be derived from configuration YAML,
+    The kwargs passed to AISingaporeClient will eventually be passed to AutoModel.from_pretrained().
+    Since the kwargs from AISingaporeClient may be derived from configuration YAML,
     they may contain primitive types instead of the unserializable types that
     AutoModel.from_pretrained() expects (e.g. torch_dtype). This function converts values of
     primitive types to values of the unserializable types."""
@@ -213,18 +213,18 @@ def _process_huggingface_client_kwargs(raw_kwargs: Dict[str, Any]):
     return processed_kwargs
 
 
-class HuggingFaceClient(CachingClient):
+class AISingaporeClient(CachingClient):
     def __init__(self, cache_config: CacheConfig, pretrained_model_name_or_path: Optional[str] = None, **kwargs):
         super().__init__(cache_config=cache_config)
         self._pretrained_model_name_or_path = pretrained_model_name_or_path
-        self._kwargs = _process_huggingface_client_kwargs(kwargs)
+        self._kwargs = _process_aisingapore_client_kwargs(kwargs)
 
     def make_request(self, request: Request) -> RequestResult:
         # Embedding not supported for this model
         if request.embedding:
             return EMBEDDING_UNAVAILABLE_REQUEST_RESULT
 
-        raw_request: HuggingFaceRequest = {
+        raw_request: AISingaporeRequest = {
             "engine": request.model_engine,
             "prompt": request.prompt,
             "temperature": 1e-7 if request.temperature == 0 else request.temperature,
@@ -240,8 +240,8 @@ class HuggingFaceClient(CachingClient):
         if self._pretrained_model_name_or_path:
             pretrained_model_name_or_path = self._pretrained_model_name_or_path
         else:
-            pretrained_model_name_or_path = resolve_alias(request.model_deployment)
-        huggingface_model: HuggingFaceServer = HuggingFaceServerFactory.get_server(
+            pretrained_model_name_or_path = request.model_deployment
+        aisingapore_model: AISingaporeServer = AISingaporeServerFactory.get_server(
             helm_model_name=request.model_deployment,
             pretrained_model_name_or_path=pretrained_model_name_or_path,
             **self._kwargs,
@@ -250,12 +250,12 @@ class HuggingFaceClient(CachingClient):
         try:
 
             def do_it() -> Dict[str, Any]:
-                return huggingface_model.serve_request(raw_request)
+                return aisingapore_model.serve_request(raw_request)
 
             cache_key = CachingClient.make_cache_key(raw_request, request)
             response, cached = self.cache.get(cache_key, wrap_request_time(do_it))
         except Exception as e:  # Do something if error is encountered.
-            error: str = f"HuggingFace error: {e}"
+            error: str = f"AISingapore error: {e}"
             return RequestResult(success=False, cached=False, error=error, completions=[], embedding=[])
 
         completions = []
