@@ -17,6 +17,7 @@ from helm.benchmark.metrics.xlsum import tokenizers
 
 import numpy as np
 from sacrebleu.metrics import CHRF
+from evaluate import load
 
 class BhasaSummarizationMetric(Metric):
     """Summarization Metrics
@@ -93,6 +94,7 @@ class BhasaMachineTranslationMetric(Metric):
 
     def __init__(self):
         self.chrf_scorer = CHRF(word_order=2)
+        self.comet_scorer = load('comet') 
 
     def evaluate(
         self, scenario_state: ScenarioState, metric_service: MetricService, eval_cache_path: str, parallelism: int
@@ -103,6 +105,11 @@ class BhasaMachineTranslationMetric(Metric):
         metrics: Dict[str, float] = {}
         metrics['ChrF++'] = np.max([self.chrf_scorer.corpus_score(ref, pred).score for ref in refs])
         return metrics
+    
+    # def _compute_comet(self, refs: List[str], pred: str, inp: str) -> Dict[str, float]:
+    #     metrics: Dict[str, float] = {}
+    #     metrics['COMET'] = np.max([self.comet_scorer.compute(pred, ref, inp)['mean_score'] for ref in refs])
+    #     return metrics
 
     def _remove_braces(self, text: str) -> str:
         if text.startswith("{"):
@@ -128,5 +135,8 @@ class BhasaMachineTranslationMetric(Metric):
 
         # Compute ChrF++ metrics
         result.extend([Stat(MetricName(name)).add(float(val)) for name, val in self._compute_chrf(refs, pred).items()])
+
+         # Compute COMET metrics
+        # result.extend([Stat(MetricName(name)).add(float(val)) for name, val in self._compute_comet(refs, pred, inp).items()])
 
         return result
