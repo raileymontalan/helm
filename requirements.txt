@@ -202,6 +202,8 @@ pyparsing==3.1.1
 pypinyin==0.49.0
 PySocks==1.7.1
 pytest==7.2.2
+pythainlp==5.0.0
+pyonmttok==1.37.0
 python-dateutil==2.8.2
 python-utils==3.8.2
 pytorch-fid==0.3.0

@@ -36,6 +36,8 @@ from helm.benchmark.metrics.common_metric_specs import (
     get_basic_generation_metric_specs,
     get_basic_reference_metric_specs,
     get_generic_metric_specs,
+    get_bhasa_summarization_metric_specs,
+    get_bhasa_machine_translation_metric_specs,
 )
 from helm.benchmark.metrics.metric import MetricSpec
 from helm.benchmark.run_spec import RunSpec, run_spec_function
@@ -433,7 +435,7 @@ flores_prompts = {
     },
 }
 
-def generate_flores_run_spec(zeroshot=False, pair="en_id", device="gpu"):
+def generate_flores_run_spec(zeroshot=False, pair="en_id"):
     max_train_instances = 5
     name = f"flores_mt_{pair}"
 
@@ -460,7 +462,7 @@ def generate_flores_run_spec(zeroshot=False, pair="en_id", device="gpu"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_machine_translation_metric_specs(),
+        metric_specs=get_bhasa_machine_translation_metric_specs(),
         groups=["bhasa_nlg"],
     )
     
@@ -547,7 +549,10 @@ def generate_xlsum_run_spec(zeroshot=False, language="id", device="gpu"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_summarization_metric_specs({"task": name, "device": device}),
+        metric_specs=get_bhasa_summarization_metric_specs(args={
+            "language": language
+        }
+    ),
         groups=["bhasa_nlg"],
     )
     
