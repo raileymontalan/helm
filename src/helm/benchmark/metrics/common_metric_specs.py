@@ -98,6 +98,10 @@ def get_generative_harms_metric_specs(
         metric_specs.extend(get_toxicity_metric_specs())
     return metric_specs
 
+def get_machine_translation_metric_specs() -> List[MetricSpec]:
+    return [
+        MetricSpec(class_name="helm.benchmark.metrics.machine_translation_metrics.MachineTranslationMetric")
+    ] + get_basic_metric_specs([])
 
 def get_summarization_metric_specs(args: Dict[str, Any]) -> List[MetricSpec]:
     return [

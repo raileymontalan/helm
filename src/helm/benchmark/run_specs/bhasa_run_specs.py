@@ -15,6 +15,7 @@ from helm.benchmark.adaptation.common_adapter_specs import (
     get_language_modeling_adapter_spec,
     get_multiple_choice_adapter_spec,
     get_ranking_binary_adapter_spec,
+    get_machine_translation_adapter_spec,
     get_summarization_adapter_spec,
 )
 from helm.benchmark.adaptation.bhasa_adapter_specs import get_bhasa_adapter_spec
@@ -28,6 +29,7 @@ from helm.benchmark.metrics.common_metric_specs import (
     get_f1_metric_specs,
     get_generative_harms_metric_specs,
     get_language_modeling_metric_specs,
+    get_machine_translation_metric_specs,
     get_numeracy_metric_specs,
     get_open_ended_generation_metric_specs,
     get_summarization_metric_specs,
@@ -96,23 +98,36 @@ def get_tydiqa_goldp_qa_id_spec(zeroshot=False) -> RunSpec:
         groups=["bhasa_nlu"],
     )
 
-@run_spec_function("xquad_qa_vi")
-def get_xquad_qa_vi_spec(zeroshot=False) -> RunSpec:
+xquad_prompts = {
+    "th": {
+        "instructions": "คุณจะได้รับข้อความและคำถาม กรุณาตอบคำถามโดยแยกคำตอบจากข้อความ",
+        "output_noun": "คำตอบ",
+    },
+    "vi": {
+        "instructions": "Bạn sẽ được cho một đoạn văn và một câu hỏi. Trả lời câu hỏi bằng cách trích xuất câu trả lời từ đoạn văn.",
+        "output_noun": "Câu trả lời",
+    },
+}
+
+def generate_xquad_run_spec(zeroshot=False, language="th"):
     max_train_instances = 5
-    name = "xquad_qa_vi"
+    name = f"xquad_qa_{language}"
 
     if zeroshot:
         name += ",zeroshot=True"
         max_train_instances = 0
-
+        
     adapter_spec = get_generation_adapter_spec(
-        instructions="Bạn sẽ được cho một đoạn văn và một câu hỏi. Trả lời câu hỏi bằng cách trích xuất câu trả lời từ đoạn văn.",
-        output_noun="Câu trả lời",
+        instructions=xquad_prompts[language]['instructions'],
+        output_noun=xquad_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
     )
 
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_QA_VI_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_QA_Scenario",
+        args={
+            "language": language,
+        },
     )
 
     return RunSpec(
@@ -122,33 +137,14 @@ def get_xquad_qa_vi_spec(zeroshot=False) -> RunSpec:
         metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlu"],
     )
-
+    
 @run_spec_function("xquad_qa_th")
 def get_xquad_qa_th_spec(zeroshot=False) -> RunSpec:
-    max_train_instances = 5
-    name = "xquad_qa_th"
+    return generate_xquad_run_spec(zeroshot, 'th')
 
-    if zeroshot:
-        name += ",zeroshot=True"
-        max_train_instances = 0
-
-    adapter_spec = get_generation_adapter_spec(
-        instructions="คุณจะได้รับข้อความและคำถาม กรุณาตอบคำถามโดยแยกคำตอบจากข้อความ",
-        output_noun="คำตอบ",
-        max_train_instances=max_train_instances,
-    )
-
-    scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XQuAD_QA_TH_Scenario"
-    )
-
-    return RunSpec(
-        name=name,
-        scenario_spec=scenario_spec,
-        adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
-        groups=["bhasa_nlu"],
-    )
+@run_spec_function("xquad_qa_vi")
+def get_xquad_qa_vi_spec(zeroshot=False) -> RunSpec:
+    return generate_xquad_run_spec(zeroshot, 'vi')
 
 @run_spec_function("indicsentiment_sa_ta")
 def get_indicsentiment_sa_ta_spec(zeroshot=False) -> RunSpec:
@@ -377,6 +373,7 @@ def get_vihsd_td_vi_spec(zeroshot=False) -> RunSpec:
         adapter_spec = get_generation_adapter_spec(
             instructions="Bạn là máy phát hiện phát ngôn thù ghét. Các nhãn được định nghĩa như sau:\nSạch: Không quấy rối.\nCông kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào.\nThù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể.\nVới các định nghĩa của nhãn, hãy phân loại câu dưới đây.\nChỉ trả lời bằng A, B hoặc C.\nA: Sạch\nB: Công kích\nC: Thù ghét",
             input_noun="Câu",
+            output_noun="Câu trả lời",
             max_train_instances=max_train_instances,
         )
 
@@ -436,7 +433,7 @@ flores_prompts = {
     },
 }
 
-def generate_flores_run_spec(zeroshot=False, pair="en_id"):
+def generate_flores_run_spec(zeroshot=False, pair="en_id", device="gpu"):
     max_train_instances = 5
     name = f"flores_mt_{pair}"
 
@@ -444,10 +441,11 @@ def generate_flores_run_spec(zeroshot=False, pair="en_id"):
         name += ",zeroshot=True"
         max_train_instances = 0
         
-    adapter_spec = get_bhasa_adapter_spec(
+    adapter_spec = get_generation_adapter_spec(
         instructions=flores_prompts[pair]['instructions'],
         input_noun=flores_prompts[pair]['input_noun'],
         output_noun=flores_prompts[pair]['output_noun'],
+        max_tokens=128,
         max_train_instances=max_train_instances,
     )
 
@@ -462,7 +460,7 @@ def generate_flores_run_spec(zeroshot=False, pair="en_id"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_machine_translation_metric_specs(),
         groups=["bhasa_nlg"],
     )
     
@@ -521,25 +519,27 @@ xlsum_prompts = {
     }
 }
 
-def generate_xlsum_run_spec(zeroshot=False, lang="id"):
+def generate_xlsum_run_spec(zeroshot=False, language="id", device="gpu"):
     max_train_instances = 5
-    name = f"xlsum_as_{lang}"
+    name = f"xlsum_as_{language}"
 
     if zeroshot:
         name += ",zeroshot=True"
         max_train_instances = 0
         
     adapter_spec = get_bhasa_adapter_spec(
-        input_noun=xlsum_prompts[lang]['input_noun'],
-        input_suffix=xlsum_prompts[lang]['input_suffix'],
-        output_noun=xlsum_prompts[lang]['output_noun'],
+        input_noun=xlsum_prompts[language]['input_noun'],
+        input_suffix=xlsum_prompts[language]['input_suffix'],
+        output_noun=xlsum_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
+        temperature = 0.3,
+        max_tokens=128,
     )
 
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.XLSum_AS_Scenario",
         args={
-            "lang": lang,
+            "language": language,
         },
     )
 
@@ -547,7 +547,7 @@ def generate_xlsum_run_spec(zeroshot=False, lang="id"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_summarization_metric_specs({"task": name, "device": device}),
         groups=["bhasa_nlg"],
     )
     
@@ -570,7 +570,7 @@ def get_xlsum_as_vi_spec(zeroshot=False) -> RunSpec:
 # NLR
 
 @run_spec_function("indicxnli_nli_ta")
-def get_indicxnli_nli_ta_spec(zeroshot=False) -> RunSpec:
+def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
     max_train_instances = 5
     name = "indicxnli_nli_ta"
 
@@ -637,79 +637,71 @@ def get_indonli_nli_id_spec(zeroshot=False) -> RunSpec:
         groups=["bhasa_nlr"],
     )
 
-@run_spec_function("xnli_nli_vi")
-def get_xnli_nli_vi_spec(zeroshot=False) -> RunSpec:
+xnli_prompts = {
+    "th": {
+        "instructions": "คุณจะได้รับสองข้อความ X และ Y",
+        "input_suffix": "กรุณาพิจารณาว่า ข้อความใดต่อไปนี้ใช้กับข้อความ X และ Y ได้ดีที่สุด\nA: ถ้า X เป็นจริง Y จะต้องเป็นจริง\nB: X ขัดแย้งกับ Y\nC: เมื่อ X เป็นจริง Y อาจเป็นจริงหรือไม่ก็ได้\nกรุณาตอบด้วยตัวอักษร A, B หรือ C ตัวเดียวเท่านั้น",
+        "output_noun": "คำตอบ",
+    },
+    "vi": {
+        "instructions": "Bạn sẽ được cho hai câu, X và Y.",
+        "input_suffix": "Xác định câu nào sau đây là câu phù hợp nhất cho câu X và Y.\nA: Nếu X đúng thì Y phải đúng.\nB: X mâu thuẫn với Y.\nC: Khi X đúng, Y có thể đúng hoặc không đúng.\nTrả lời với một chữ cái duy nhất A, B, hoặc C.",
+        "output_noun": "Câu trả lời",
+    },
+}
+
+def generate_xnli_run_spec(zeroshot=False, language="vi"):
     max_train_instances = 5
-    name = "xnli_nli_vi"
+    name = f"xnli_nli_{language}"
 
     if zeroshot:
         name += ",zeroshot=True"
         max_train_instances = 0
         adapter_spec = get_bhasa_adapter_spec(
-            instructions="Bạn sẽ được cho hai câu, X và Y.",
-            input_suffix="Xác định câu nào sau đây là câu phù hợp nhất cho câu X và Y.\nA: Nếu X đúng thì Y phải đúng.\nB: X mâu thuẫn với Y.\nC: Khi X đúng, Y có thể đúng hoặc không đúng.\nTrả lời với một chữ cái duy nhất A, B, hoặc C.",
-            output_noun="Câu trả lời",
-            max_train_instances=max_train_instances,
-        )
-
-    else:
-        adapter_spec = get_generation_adapter_spec(
-            instructions="Bạn sẽ được cho hai câu, X và Y.\nXác định câu nào sau đây là câu phù hợp nhất cho câu X và Y.\nA: Nếu X đúng thì Y phải đúng.\nB: X mâu thuẫn với Y.\nC: Khi X đúng, Y có thể đúng hoặc không đúng.\nTrả lời với một chữ cái duy nhất A, B, hoặc C.",
-            output_noun="Câu trả lời",
-            max_train_instances=max_train_instances,
-        )
-        
-
-    scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XNLI_NLI_VI_Scenario"
-    )
-
-    return RunSpec(
-        name=name,
-        scenario_spec=scenario_spec,
-        adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
-        groups=["bhasa_nlr"],
-    )
-
-@run_spec_function("xnli_nli_th")
-def get_xnli_nli_th_spec(zeroshot=False) -> RunSpec:
-    max_train_instances = 5
-    name = "xnli_nli_vi"
-
-    if zeroshot:
-        name += ",zeroshot=True"
-        max_train_instances = 0
-        adapter_spec = get_bhasa_adapter_spec(
-            instructions="คุณจะได้รับสองข้อความ X และ Y",
-            input_suffix="กรุณาพิจารณาว่า ข้อความใดต่อไปนี้ใช้กับข้อความ X และ Y ได้ดีที่สุด\nA: ถ้า X เป็นจริง Y จะต้องเป็นจริง\nB: X ขัดแย้งกับ Y\nC: เมื่อ X เป็นจริง Y อาจเป็นจริงหรือไม่ก็ได้\nกรุณาตอบด้วยตัวอักษร A, B หรือ C ตัวเดียวเท่านั้น",
-            output_noun="คำตอบ",
+            instructions=xnli_prompts[language]['instructions'],
+            input_suffix=xnli_prompts[language]['input_suffix'],
+            output_noun=xnli_prompts[language]['output_noun'],
             max_train_instances=max_train_instances,
         )
     
     else:
         adapter_spec = get_generation_adapter_spec(
-            instructions="คุณจะได้รับสองข้อความ X และ Y\nX: {sentence1}\nY: {sentence2}\nกรุณาพิจารณาว่า ข้อความใดต่อไปนี้ใช้กับข้อความ X และ Y ได้ดีที่สุด\nA: ถ้า X เป็นจริง Y จะต้องเป็นจริง\nB: X ขัดแย้งกับ Y\nC: เมื่อ X เป็นจริง Y อาจเป็นจริงหรือไม่ก็ได้\nกรุณาตอบด้วยตัวอักษร A, B หรือ C ตัวเดียวเท่านั้น\nคำตอบ:",
-            output_noun="คำตอบ",
+            instructions=xnli_prompts[language]['instructions'] + '\n' + xnli_prompts[language]['input_suffix'],
+            output_noun=xnli_prompts[language]['output_noun'],
             max_train_instances=max_train_instances,
         )
 
     scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.XNLI_NLI_TH_Scenario"
+        class_name="helm.benchmark.scenarios.bhasa_scenario.XNLI_NLI_Scenario",
+        args={
+            "language": language,
+        },
     )
 
     return RunSpec(
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_classification_metric_specs(),
         groups=["bhasa_nlr"],
     )
+
+@run_spec_function("xnli_nli_th")
+def get_xnli_nli_th_spec(zeroshot=False) -> RunSpec:
+    return generate_xnli_run_spec(zeroshot, language="th")
+
+@run_spec_function("xnli_nli_vi")
+def get_xnli_nli_vi_spec(zeroshot=False) -> RunSpec:
+    return generate_xnli_run_spec(zeroshot, language="vi")
 
 xcopa_prompts = {
     "id": {
         "input_noun": "Situasi",
         "output_noun": "Jawaban",
+    },
+    "ta": {
+        "input_noun": "சூழ்நிலை",
+        "output_noun": "பதில்",
     },
     "th": {
         "input_noun": "สถานการณ์",
@@ -721,24 +713,24 @@ xcopa_prompts = {
     }
 }
 
-def generate_xcopa_run_spec(zeroshot=False, lang="id"):
+def generate_xcopa_run_spec(zeroshot=False, language="id"):
     max_train_instances = 5
-    name = f"xcopa_cr_{lang}"
+    name = f"xcopa_cr_{language}"
 
     if zeroshot:
         name += ",zeroshot=True"
         max_train_instances = 0
         
     adapter_spec = get_generation_adapter_spec(
-        input_noun=xcopa_prompts[lang]['input_noun'],
-        output_noun=xcopa_prompts[lang]['output_noun'],
+        input_noun=xcopa_prompts[language]['input_noun'],
+        output_noun=xcopa_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
     )
 
     scenario_spec = ScenarioSpec(
         class_name="helm.benchmark.scenarios.bhasa_scenario.XCOPA_CR_Scenario",
         args={
-            "lang": lang,
+            "language": language,
         },
     )
 
@@ -746,130 +738,64 @@ def generate_xcopa_run_spec(zeroshot=False, lang="id"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
-        groups=["bhasa_nlg"],
+        metric_specs=get_classification_metric_specs(),
+        groups=["bhasa_nlr"],
     )
 
 @run_spec_function("xcopa_cr_id")
 def get_xcopa_cr_id_spec(zeroshot=False) -> RunSpec:
     return generate_xcopa_run_spec(zeroshot, 'id')
 
+@run_spec_function("xcopa_cr_ta")
+def get_xcopa_cr_ta_spec(zeroshot=False) -> RunSpec:
+    return generate_xcopa_run_spec(zeroshot, 'ta')
+
 @run_spec_function("xcopa_cr_th")
 def get_xcopa_cr_th_spec(zeroshot=False) -> RunSpec:
     return generate_xcopa_run_spec(zeroshot, 'th')
-
 
 @run_spec_function("xcopa_cr_vi")
 def get_xcopa_cr_vi_spec(zeroshot=False) -> RunSpec:
     return generate_xcopa_run_spec(zeroshot, 'vi')
     
-# @run_spec_function("xcopa_cr_id")
-# def get_xcopa_cr_id_spec(zeroshot=False) -> RunSpec:
-#     max_train_instances = 5
-#     name = "xcopa_cr_id"
-
-#     if zeroshot:
-#         name += ",zeroshot=True"
-#         max_train_instances = 0
-
-#     adapter_spec = get_generation_adapter_spec(
-#         input_noun="Situasi",
-#         output_noun="Jawaban",
-#         max_train_instances=max_train_instances,
-#     )
-
-#     scenario_spec = ScenarioSpec(
-#         class_name="helm.benchmark.scenarios.bhasa_scenario.XCOPA_CR_ID_Scenario"
-#     )
-
-#     return RunSpec(
-#         name=name,
-#         scenario_spec=scenario_spec,
-#         adapter_spec=adapter_spec,
-#         metric_specs=get_f1_metric_specs(),
-#         groups=["bhasa_nlr"],
-#     )
-
-# @run_spec_function("xcopa_cr_th")
-# def get_xcopa_cr_th_spec(zeroshot=False) -> RunSpec:
-#     max_train_instances = 5
-#     name = "xcopa_cr_th"
-
-#     if zeroshot:
-#         name += ",zeroshot=True"
-#         max_train_instances = 0
-
-#     adapter_spec = get_generation_adapter_spec(
-#         input_noun="สถานการณ์",
-#         output_noun="nคำตอบ",
-#         max_train_instances=max_train_instances,
-#     )
-        
-
-#     scenario_spec = ScenarioSpec(
-#         class_name="helm.benchmark.scenarios.bhasa_scenario.XCOPA_CR_TH_Scenario"
-#     )
-
-#     return RunSpec(
-#         name=name,
-#         scenario_spec=scenario_spec,
-#         adapter_spec=adapter_spec,
-#         metric_specs=get_f1_metric_specs(),
-#         groups=["bhasa_nlr"],
-#     )
-
-# @run_spec_function("xcopa_cr_vi")
-# def get_xcopa_cr_vi_spec(zeroshot=False) -> RunSpec:
-#     max_train_instances = 5
-#     name = "xcopa_cr_vi"
-
-#     if zeroshot:
-#         name += ",zeroshot=True"
-#         max_train_instances = 0
-
-#     adapter_spec = get_generation_adapter_spec(
-#         input_noun="Tình huống",
-#         output_noun="Câu trả lời",
-#         max_train_instances=max_train_instances,
-#     )
-
-#     scenario_spec = ScenarioSpec(
-#         class_name="helm.benchmark.scenarios.bhasa_scenario.XCOPA_CR_VI_Scenario"
-#     )
-
-#     return RunSpec(
-#         name=name,
-#         scenario_spec=scenario_spec,
-#         adapter_spec=adapter_spec,
-#         metric_specs=get_f1_metric_specs(),
-#         groups=["bhasa_nlr"],
-#     )
-
 # LD
 
-@run_spec_function("lindsea_mp_id")
-def get_lindsea_mp_id_spec(zeroshot=False) -> RunSpec:
-    max_train_instances = 5
-    name = "uit_vsfc_sa_vi"
+# lindsea_mp_prompts = {
+#     "id": {
+#         "instructions": "System Prompt:\nAnda adalah seorang ahli bahasa Indonesia\nHuman Prompt:",
+#         "input_suffix": "Jawablah dengan menggunakan A atau B saja.",
+#     },
+# }
 
-    if zeroshot:
-        name += ",zeroshot=True"
-        max_train_instances = 0
+# def generate_lindsea_mp_run_spec(zeroshot=False, language="id") -> RunSpec:
+#     max_train_instances = 5
+#     name = f"lindsea_mp_{language}"
 
-    scenario_spec = ScenarioSpec(
-        class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_MP_ID_Scenario"
-    )
+#     if zeroshot:
+#         name += ",zeroshot=True"
+#         max_train_instances = 0
 
-    adapter_spec = get_bhasa_multiple_choice_joint_adapter_spec(
-        instructions="System Prompt:\nAnda adalah seorang ahli bahasa Indonesia\nHuman Prompt:",
-        output_prefix="Jawablah dengan menggunakan A atau B saja.\n",
-        max_train_instances=max_train_instances,
-    )
+#     scenario_spec = ScenarioSpec(
+#         class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_MP_Scenario",
+#         args={
+#             "language": language,
+#         }
+#     )
 
-    return RunSpec(
-        name=name,
-        scenario_spec=scenario_spec,
-        adapter_spec=adapter_spec,
-        metric_specs=get_exact_match_metric_specs(),
-        groups=["bhasa_ld"],
-    )
+#     adapter_spec = get_bhasa_adapter_spec(
+#         instructions=lindsea_mp_prompts[language]['instructions'],
+#         input_suffix=lindsea_mp_prompts[language]['input_suffix'],
+#         max_train_instances=max_train_instances,
+#     )
+
+#     return RunSpec(
+#         name=name,
+#         scenario_spec=scenario_spec,
+#         adapter_spec=adapter_spec,
+#         metric_specs=get_exact_match_metric_specs(),
+#         groups=["bhasa_ld"],
+#     )
+
+# @run_spec_function("lindsea_mp_id")
+# def get_lindsea_mp_id_spec(zeroshot=False) -> RunSpec:
+#     return generate_lindsea_mp_run_spec(zeroshot, 'id')
