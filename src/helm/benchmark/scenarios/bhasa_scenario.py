@@ -49,24 +49,25 @@ class IndicQA_QA_TA_Scenario(Scenario):
         for split in list(dataset.keys()):
             data = dataset[split].to_pandas()
             for index, row in data.iterrows():
-                passage = row["context"].strip()
-                question = row["question"].strip()
-                input = PassageQuestionInput(
-                    passage=passage,
-                    question=question,
-                    passage_prefix="பத்தி: ",
-                    question_prefix="கேள்வி: ",
-                )
-                output = Output(text=row["answers"]["text"][0].strip())
-                references = [
-                    Reference(output, tags=[CORRECT_TAG]),
-                ]
-                instance = Instance(
-                    input=input,
-                    references=references, 
-                    split=self.splits[split]
-                )
-                outputs.append(instance)
+                if len(row["answers"]["text"][0].strip()) > 0:
+                    passage = row["context"].strip()
+                    question = row["question"].strip()
+                    input = PassageQuestionInput(
+                        passage=passage,
+                        question=question,
+                        passage_prefix="பத்தி: ",
+                        question_prefix="கேள்வி: ",
+                    )
+                    output = Output(text=row["answers"]["text"][0].strip())
+                    references = [
+                        Reference(output, tags=[CORRECT_TAG]),
+                    ]
+                    instance = Instance(
+                        input=input,
+                        references=references, 
+                        split=self.splits[split]
+                    )
+                    outputs.append(instance)
         return outputs
 
 class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
