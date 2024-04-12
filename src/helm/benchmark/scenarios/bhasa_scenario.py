@@ -960,7 +960,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         outputs = []
         for split in self.splits:
             data = dataset[split].to_pandas()
-            for index, row in split.iterrows():
+            for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
                 output = Output(text=self.id2label[row["label"]])

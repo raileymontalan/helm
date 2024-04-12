@@ -17,7 +17,7 @@ from helm.benchmark.metrics.xlsum import tokenizers
 
 import numpy as np
 from sacrebleu.metrics import CHRF
-from evaluate import load
+# from evaluate import load
 
 class BhasaSummarizationMetric(Metric):
     """Summarization Metrics
@@ -94,7 +94,7 @@ class BhasaMachineTranslationMetric(Metric):
 
     def __init__(self):
         self.chrf_scorer = CHRF(word_order=2)
-        self.comet_scorer = load('comet') 
+        # self.comet_scorer = load('comet') 
 
     def evaluate(
         self, scenario_state: ScenarioState, metric_service: MetricService, eval_cache_path: str, parallelism: int
@@ -103,7 +103,7 @@ class BhasaMachineTranslationMetric(Metric):
 
     def _compute_chrf(self, refs: List[str], pred: str) -> Dict[str, float]:
         metrics: Dict[str, float] = {}
-        metrics['ChrF++'] = np.max([self.chrf_scorer.corpus_score(ref, pred).score for ref in refs])
+        metrics['ChrF++'] = self.chrf_scorer.sentence_score(pred, refs).score
         return metrics
     
     # def _compute_comet(self, refs: List[str], pred: str, inp: str) -> Dict[str, float]:
