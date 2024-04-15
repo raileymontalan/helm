@@ -1202,13 +1202,16 @@ class XCOPA_CR_Scenario(Scenario):
         }
 
     def get_instances(self, output_path) -> List[Instance]:
-        dataset = datasets.load_dataset("xcopa", self.language)
+        language_dataset = datasets.load_dataset("xcopa", self.language)
+        tamil_dataset = datasets.load_dataset("xcopa", 'ta')
 
         outputs = []
-        for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
-            for index, row in data.iterrows():
-                instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question']])
+        for split in self.splits.keys():
+            language_df = language_dataset[split].to_pandas()
+            tamil_df = tamil_dataset[split].to_pandas()
+            df = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
+            for index, row in df.iterrows():
+                instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
                 passage = "{premise}\n{instruction1}\nA: {choice1}\nB:{choice2}\n{instruction2}".format(
                     premise=row["premise"].strip(),
                     instruction1=instruction1,
