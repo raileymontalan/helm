@@ -18,7 +18,10 @@ from helm.benchmark.adaptation.common_adapter_specs import (
     get_machine_translation_adapter_spec,
     get_summarization_adapter_spec,
 )
-from helm.benchmark.adaptation.bhasa_adapter_specs import get_bhasa_adapter_spec
+from helm.benchmark.adaptation.bhasa_adapter_specs import (
+    get_bhasa_adapter_spec,
+    get_bhasa_multiple_choice_joint_adapter_spec,
+)
 from helm.benchmark.metrics.common_metric_specs import (
     get_basic_metric_specs,
     get_bias_metric_specs,
@@ -774,42 +777,84 @@ def get_xcopa_cr_vi_spec(zeroshot=False) -> RunSpec:
     
 # LD
 
-# lindsea_mp_prompts = {
-#     "id": {
-#         "instructions": "System Prompt:\nAnda adalah seorang ahli bahasa Indonesia\nHuman Prompt:",
-#         "input_suffix": "Jawablah dengan menggunakan A atau B saja.",
-#     },
-# }
+lindsea_mp_prompts = {
+    "id": {
+        "instructions": "Anda adalah seorang ahli bahasa Indonesia.",
+        "input_suffix": "Jawablah dengan menggunakan A atau B saja.",
+        "output_noun": "Jawaban",
+    },
+}
 
-# def generate_lindsea_mp_run_spec(zeroshot=False, language="id") -> RunSpec:
-#     max_train_instances = 5
-#     name = f"lindsea_mp_{language}"
+def generate_lindsea_mp_run_spec(zeroshot=False, language="id") -> RunSpec:
+    max_train_instances = 5
+    name = f"lindsea_mp_{language}"
 
-#     if zeroshot:
-#         name += ",zeroshot=True"
-#         max_train_instances = 0
+    if zeroshot:
+        name += ",zeroshot=True"
+        max_train_instances = 0
 
-#     scenario_spec = ScenarioSpec(
-#         class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_MP_Scenario",
-#         args={
-#             "language": language,
-#         }
-#     )
+    adapter_spec = get_bhasa_multiple_choice_joint_adapter_spec(
+        instructions=lindsea_mp_prompts[language]['instructions'],
+        input_suffix=lindsea_mp_prompts[language]['input_suffix'],
+        output_noun=lindsea_mp_prompts[language]['output_noun'],
+        max_train_instances=max_train_instances,
+    )
 
-#     adapter_spec = get_bhasa_adapter_spec(
-#         instructions=lindsea_mp_prompts[language]['instructions'],
-#         input_suffix=lindsea_mp_prompts[language]['input_suffix'],
-#         max_train_instances=max_train_instances,
-#     )
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_MP_Scenario",
+        args={
+            "language": language,
+        }
+    )
 
-#     return RunSpec(
-#         name=name,
-#         scenario_spec=scenario_spec,
-#         adapter_spec=adapter_spec,
-#         metric_specs=get_exact_match_metric_specs(),
-#         groups=["bhasa_ld"],
-#     )
+    return RunSpec(
+        name=name,
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_exact_match_metric_specs(),
+        groups=["bhasa_ld"],
+    )
 
-# @run_spec_function("lindsea_mp_id")
-# def get_lindsea_mp_id_spec(zeroshot=False) -> RunSpec:
-#     return generate_lindsea_mp_run_spec(zeroshot, 'id')
+@run_spec_function("lindsea_mp_id")
+def get_lindsea_mp_id_spec(zeroshot=False) -> RunSpec:
+    return generate_lindsea_mp_run_spec(zeroshot, 'id')
+
+lindsea_pr_prompts = {
+    "id": {
+        "instructions": "Anda adalah seorang ahli bahasa Indonesia.",
+        "output_noun": "Jawaban",
+    },
+}
+
+def generate_lindsea_pr_run_spec(zeroshot=False, language="id") -> RunSpec:
+    max_train_instances = 5
+    name = f"lindsea_pr_{language}"
+
+    if zeroshot:
+        name += ",zeroshot=True"
+        max_train_instances = 0
+
+    adapter_spec = get_bhasa_adapter_spec(
+        instructions=lindsea_pr_prompts[language]['instructions'],
+        output_noun=lindsea_pr_prompts[language]['output_noun'],
+        max_train_instances=max_train_instances,
+    )
+
+    scenario_spec = ScenarioSpec(
+        class_name="helm.benchmark.scenarios.bhasa_scenario.LINDSEA_PR_Scenario",
+        args={
+            "language": language,
+        }
+    )
+
+    return RunSpec(
+        name=name,
+        scenario_spec=scenario_spec,
+        adapter_spec=adapter_spec,
+        metric_specs=get_exact_match_metric_specs(),
+        groups=["bhasa_ld"],
+    )
+
+# @run_spec_function("lindsea_pr_id")
+# def get_lindsea_pr_id_spec(zeroshot=False) -> RunSpec:
+#     return generate_lindsea_pr_run_spec(zeroshot, 'id')
