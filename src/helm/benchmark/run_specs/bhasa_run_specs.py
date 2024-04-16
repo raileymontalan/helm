@@ -38,6 +38,7 @@ from helm.benchmark.metrics.common_metric_specs import (
     get_generic_metric_specs,
     get_bhasa_summarization_metric_specs,
     get_bhasa_machine_translation_metric_specs,
+    get_bhasa_qa_metric_specs,
 )
 from helm.benchmark.metrics.metric import MetricSpec
 from helm.benchmark.run_spec import RunSpec, run_spec_function
@@ -59,6 +60,7 @@ def get_indicqa_qa_ta_spec(zeroshot=False) -> RunSpec:
         instructions="உங்களுக்கு ஒரு பத்தியும் ஒரு கேள்வியும் தரப்படும். தரப்பட்ட பத்தியிலிருந்து கேள்விக்கான பதிலைக் கண்டறியவும். கேள்விக்குப் பதிலளிக்கமுடியாவிட்டால் ஒற்றை எழுத்து X இனைப் பதிலாக அளிக்கவும்.",
         output_noun="பதில்",
         max_train_instances=max_train_instances,
+        max_tokens=50,
     )
 
     scenario_spec = ScenarioSpec(
@@ -69,7 +71,9 @@ def get_indicqa_qa_ta_spec(zeroshot=False) -> RunSpec:
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_bhasa_qa_metric_specs(args={
+            "language": 'ta',
+        }),
         groups=["bhasa_nlu"],
     )
 
@@ -86,6 +90,7 @@ def get_tydiqa_goldp_qa_id_spec(zeroshot=False) -> RunSpec:
         instructions="Anda akan diberikan sebuah paragraf dan sebuah pertanyaan. Jawablah pertanyaannya dengan mengekstrak jawaban dari paragraf tersebut.",
         output_noun="Jawaban",
         max_train_instances=max_train_instances,
+        max_tokens=50,
     )
 
     scenario_spec = ScenarioSpec(
@@ -96,7 +101,9 @@ def get_tydiqa_goldp_qa_id_spec(zeroshot=False) -> RunSpec:
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_bhasa_qa_metric_specs(args={
+            "language": 'id',
+        }),
         groups=["bhasa_nlu"],
     )
 
@@ -123,6 +130,7 @@ def generate_xquad_run_spec(zeroshot=False, language="th"):
         instructions=xquad_prompts[language]['instructions'],
         output_noun=xquad_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
+        max_tokens=50,
     )
 
     scenario_spec = ScenarioSpec(
@@ -136,7 +144,9 @@ def generate_xquad_run_spec(zeroshot=False, language="th"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_f1_metric_specs(),
+        metric_specs=get_bhasa_qa_metric_specs(args={
+            "language": language,
+        }),
         groups=["bhasa_nlu"],
     )
     
@@ -551,8 +561,7 @@ def generate_xlsum_run_spec(zeroshot=False, language="id", device="gpu"):
         adapter_spec=adapter_spec,
         metric_specs=get_bhasa_summarization_metric_specs(args={
             "language": language
-        }
-    ),
+        }),
         groups=["bhasa_nlg"],
     )
     

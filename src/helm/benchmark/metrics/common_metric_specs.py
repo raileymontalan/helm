@@ -179,3 +179,8 @@ def get_bhasa_summarization_metric_specs(args: Dict[str, Any]) -> List[MetricSpe
     return [
         MetricSpec(class_name="helm.benchmark.metrics.bhasa_metrics.BhasaSummarizationMetric", args=args)
     ] + get_basic_metric_specs([])
+
+def get_bhasa_qa_metric_specs(args: Dict[str, Any]) -> List[MetricSpec]:
+    return [
+        MetricSpec(class_name="helm.benchmark.metrics.bhasa_metrics.BhasaQAMetric", args=args)
+    ] + get_basic_metric_specs([])
