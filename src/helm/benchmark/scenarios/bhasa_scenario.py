@@ -47,7 +47,8 @@ class IndicQA_QA_TA_Scenario(Scenario):
 
         outputs = []
         for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.sample(n=100, random_state=7901)
             for index, row in data.iterrows():
                 if len(row["answers"]["text"][0].strip()) > 0:
                     passage = row["context"].strip()
@@ -125,7 +126,8 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
 
         outputs = []
         for split in self.splits:
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.sample(n=100, random_state=5018)
             for index, row in data.iterrows():
                 passage = row["passage_text"].strip()
                 question = row["question_text"].strip()
@@ -184,14 +186,16 @@ class XQuAD_QA_Scenario(Scenario):
             'train': TRAIN_SPLIT,
             'test': TEST_SPLIT
         }
-        self.prefixes = {
+        self.map = {
             "th": {
                 "passage_prefix": "ข้อความ: ",
                 "question_prefix": "คำถาม: ",
+                "random_seed": 4520,
             },
             "vi": {
                 "passage_prefix": "Đoạn văn: ",
                 "question_prefix": "Câu hỏi: ",
+                "random_seed": 4502,
             }
         }
 
@@ -201,15 +205,16 @@ class XQuAD_QA_Scenario(Scenario):
 
         outputs = []
         for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.sample(n=100, random_state=self.map[self.language]["random_state"])
             for index, row in data.iterrows():
                 passage = row["context"].strip()
                 question = row["question"].strip()
                 input = PassageQuestionInput(
                     passage=passage,
                     question=question,
-                    passage_prefix=self.prefixes[self.language]['passage_prefix'],
-                    question_prefix=self.prefixes[self.language]['question_prefix'],
+                    passage_prefix=self.map[self.language]['passage_prefix'],
+                    question_prefix=self.map[self.language]['question_prefix'],
                 )
                 output = Output(text=row["answers"]["text"][0].strip())
                 references = [
@@ -261,8 +266,8 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
             'test': TEST_SPLIT
         }
         self.sentiment2label = {
-            'Positive': 'ேநர்மைற',
-            'Negative': 'எதிர்மைற',
+            'Positive': 'நேர்மறை',
+            'Negative': 'எதிர்மறை',
         }
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -270,10 +275,9 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
 
         outputs = []
         for split in self.splits:
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.dropna(subset=["INDIC REVIEW", "LABEL"])
             for index, row in data.iterrows():
-                if not row["LABEL"]:
-                    continue
                 input = Input(row["INDIC REVIEW"].strip())
                 output = Output(text=self.sentiment2label[row["LABEL"]])
                 references = [
@@ -344,7 +348,8 @@ class NusaX_SA_ID_Scenario(Scenario):
             data[split] = []
             target_path_file = os.path.join(output_path, split)
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
-            data[split] = pd.read_csv(target_path_file)
+            df = pd.read_csv(target_path_file)
+            data[split] = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
         return data
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -424,7 +429,9 @@ class Wisesight_SA_TH_Scenario(Scenario):
         for split in self.splits.keys():
             data[split] = []
             target_path_file = os.path.join(data_path, "data", f"{split}.jsonl")
-            data[split] = pd.read_json(target_path_file, lines=True)
+            df = pd.read_json(target_path_file, lines=True)
+            df = df[df["category"] != "q"]
+            data[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
         return data
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -432,8 +439,6 @@ class Wisesight_SA_TH_Scenario(Scenario):
         outputs = []
         for split in list(data.keys()):
             for index, row in data[split].iterrows():
-                if row["category"].strip() == "q":
-                    continue
                 input = Input(row["texts"].strip())
                 output = Output(text=self.sentiment2label[row["category"]])
                 references = [
@@ -593,6 +598,8 @@ class MLHSD_TD_ID_Scenario(Scenario):
         target_path_file = os.path.join(output_path, "mlhsd")
         ensure_file_downloaded(source_url=URL, target_path=target_path_file)
         df = pd.read_csv(target_path_file, encoding="ISO-8859-1")
+        df['label'] = df.apply(lambda x: get_label(x))
+        df = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=7123))
 
         split_index = int(len(df)*0.8)
         data = {}
@@ -614,7 +621,7 @@ class MLHSD_TD_ID_Scenario(Scenario):
         for split in list(data.keys()):
             for index, row in data[split].iterrows():
                 input = Input(row["Tweet"].strip())
-                output = Output(text=self.get_label(row))
+                output = Output(text=row['label'])
                 references = [
                     Reference(output, tags=[CORRECT_TAG]),
                 ]
@@ -669,20 +676,22 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
 
         outputs = []
         for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            df = df[df["tweet_text"].str.len() > 0]
+            df = df[df["tweet_text"]!= "TWEET_NOT_FOUND"]
+            data = df.groupby("is_toxic", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
             for index, row in data.iterrows():
-                if len(row["tweet_text"]) > 0 and row["tweet_text"] != "TWEET_NOT_FOUND":
-                    input = Input(row["tweet_text"].strip())
-                    output = Output(text=self.id2label[int(row["is_toxic"])])
-                    references = [
-                        Reference(output, tags=[CORRECT_TAG]),
-                    ]
-                    instance = Instance(
-                        input=input,
-                        references=references, 
-                        split=self.splits[split]
-                    )
-                    outputs.append(instance)
+                input = Input(row["tweet_text"].strip())
+                output = Output(text=self.id2label[int(row["is_toxic"])])
+                references = [
+                    Reference(output, tags=[CORRECT_TAG]),
+                ]
+                instance = Instance(
+                    input=input,
+                    references=references, 
+                    split=self.splits[split]
+                )
+                outputs.append(instance)
         return outputs
 
 class ViHSD_TD_VI_Scenario(Scenario):
@@ -742,7 +751,8 @@ class ViHSD_TD_VI_Scenario(Scenario):
         for split in self.splits.keys():
             data[split] = []
             target_path_file = os.path.join(data_path, "vihsd", f"{split}.csv")
-            data[split] = pd.read_csv(target_path_file)
+            df = pd.read_csv(target_path_file)
+            data[split] = df.groupby("label_id", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4878))
         return data
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -817,8 +827,8 @@ class Flores_MT_Scenario(Scenario):
         for split in self.splits.keys():
             source_df = source_dataset[split].to_pandas()
             target_df = target_dataset[split].to_pandas()
-            df = source_df.join(target_df, lsuffix="_source", rsuffix="_target")
-            for index, row in df.iterrows():
+            data = source_df.join(target_df, lsuffix="_source", rsuffix="_target")
+            for index, row in data.iterrows():
                 input = Input(row["sentence_source"].strip())
                 output = Output(row["sentence_target"].strip())
                 references = [
@@ -881,20 +891,34 @@ class XLSum_AS_Scenario(Scenario):
             'validation': VALID_SPLIT
         }
 
-        self.languages = {
-            "id": "indonesian",
-            "vi": "vietnamese",
-            "th": "thai",
-            "ta": "tamil",
+        self.map = {
+            "id": {
+                "lang": "indonesian",
+                "random_state": 6036,
+            },
+            "vi": {
+                "lang": "vietnamese",
+                "random_state": 8801,
+            },
+            "th": {
+                "lang": "thai",
+                "random_state": 10736,
+            },
+            "ta": {
+                "lang": "tamil",
+                "random_state": 5291,
+            },
         }
 
     def get_instances(self, output_path) -> List[Instance]:
-        dataset = datasets.load_dataset("csebuetnlp/xlsum", self.languages[self.language])
+        dataset = datasets.load_dataset("csebuetnlp/xlsum", self.map[self.language]['lang'])
 
         outputs = []
         for split in self.splits.keys():
-            df = dataset[split].to_pandas()
-            for index, row in df.iterrows():
+            data = dataset[split].to_pandas()
+            if split == 'test':
+                data = data.sample(n=100, random_state=self.map[self.language]['random_state'])
+            for index, row in data.iterrows():
                 input = Input(row["text"].strip())
                 output = Output(row["summary"].strip())
                 references = [
@@ -959,7 +983,8 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
 
         outputs = []
         for split in self.splits:
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1032,7 +1057,8 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
 
         outputs = []
         for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1109,7 +1135,8 @@ class XNLI_NLI_Scenario(Scenario):
 
         outputs = []
         for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
+            df = dataset[split].to_pandas()
+            data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1209,8 +1236,8 @@ class XCOPA_CR_Scenario(Scenario):
         for split in self.splits.keys():
             language_df = language_dataset[split].to_pandas()
             tamil_df = tamil_dataset[split].to_pandas()
-            df = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
-            for index, row in df.iterrows():
+            data = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
+            for index, row in data.iterrows():
                 instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
                 passage = "{premise}\n{instruction1}\nA: {choice1}\nB:{choice2}\n{instruction2}".format(
                     premise=row["premise"].strip(),

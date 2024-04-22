@@ -175,6 +175,7 @@ def get_indicsentiment_sa_ta_spec(zeroshot=False) -> RunSpec:
             input_suffix="ஒரு சொல்லில் மட்டும் பதிலளிக்கவும்:\n- நேர்மறை\n- எதிர்மறை",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
+            max_tokens=25,
         )
 
     else:
@@ -183,6 +184,7 @@ def get_indicsentiment_sa_ta_spec(zeroshot=False) -> RunSpec:
             input_noun="வாக்கியம்",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
+            max_tokens=25,
         )
 
     scenario_spec = ScenarioSpec(
@@ -247,6 +249,7 @@ def get_wisesight_sa_th_spec(zeroshot=False) -> RunSpec:
             input_suffix="โปรดตอบโดยใช้คำเดียวเท่านั้น:\n- แง่บวก\n- แง่ลบ\n- เฉยๆ",
             output_noun="คำตอบ",
             max_train_instances=max_train_instances,
+            max_tokens=8,
         )
 
     else:
@@ -255,6 +258,7 @@ def get_wisesight_sa_th_spec(zeroshot=False) -> RunSpec:
             input_noun="ข้อความ",
             output_noun="คำตอบ",
             max_train_instances=max_train_instances,
+            max_tokens=8,
         )
 
     scenario_spec = ScenarioSpec(
@@ -283,6 +287,7 @@ def get_uit_vsfc_sa_vi_spec(zeroshot=False) -> RunSpec:
             input_suffix="Trả lời với một từ duy nhất:\n- Tích cực\n- Tiêu cực\n- Trung lập",
             output_noun="Câu trả lời",
             max_train_instances=max_train_instances,
+            max_tokens=8,
         )
 
     else:
@@ -291,6 +296,7 @@ def get_uit_vsfc_sa_vi_spec(zeroshot=False) -> RunSpec:
             input_noun="Câu",
             output_noun="Câu trả lời",
             max_train_instances=max_train_instances,
+            max_tokens=8,
         )
 
     scenario_spec = ScenarioSpec(
@@ -319,6 +325,7 @@ def get_mlhsd_td_id_spec(zeroshot=False) -> RunSpec:
             input_suffix="Jawab dengan hanya A, B atau C.\nA: Bersih\nB: Kasar\nC: Benci",
             output_noun="Jawaban",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     else:
@@ -327,6 +334,7 @@ def get_mlhsd_td_id_spec(zeroshot=False) -> RunSpec:
             input_noun="Kalimat",
             output_noun="Jawaban",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     scenario_spec = ScenarioSpec(
@@ -355,6 +363,7 @@ def get_thai_toxicity_tweets_td_th_spec(zeroshot=False) -> RunSpec:
         input_noun="ข้อความ",
         output_noun="คำตอบ",
         max_train_instances=max_train_instances,
+        max_tokens=1,
     )
 
     scenario_spec = ScenarioSpec(
@@ -380,16 +389,19 @@ def get_vihsd_td_vi_spec(zeroshot=False) -> RunSpec:
         adapter_spec = get_bhasa_adapter_spec(
             instructions="Bạn là máy phát hiện phát ngôn thù ghét. Các nhãn được định nghĩa như sau:\nSạch: Không quấy rối.\nCông kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào.\nThù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể.\nVới các định nghĩa của nhãn, hãy phân loại câu dưới đây:",
             input_noun="Câu",
-            input_suffix="nChỉ trả lời bằng A, B hoặc C.\nA: Sạch\nB: Công kích\nC: Thù ghét",
+            input_suffix="Chỉ trả lời bằng A, B hoặc C.\nA: Sạch\nB: Công kích\nC: Thù ghét",
             output_noun="Câu trả lời",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
+
     else:
         adapter_spec = get_generation_adapter_spec(
             instructions="Bạn là máy phát hiện phát ngôn thù ghét. Các nhãn được định nghĩa như sau:\nSạch: Không quấy rối.\nCông kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào.\nThù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể.\nVới các định nghĩa của nhãn, hãy phân loại câu dưới đây.\nChỉ trả lời bằng A, B hoặc C.\nA: Sạch\nB: Công kích\nC: Thù ghét",
             input_noun="Câu",
             output_noun="Câu trả lời",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     scenario_spec = ScenarioSpec(
@@ -599,6 +611,7 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
             input_suffix="பின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
     
     else:
@@ -606,6 +619,7 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
             instructions="உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.\nபின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     scenario_spec = ScenarioSpec(
@@ -633,6 +647,7 @@ def get_indonli_nli_id_spec(zeroshot=False) -> RunSpec:
             input_suffix="Tentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah hanya dengan menggunakan satu huruf A, B atau C.",
             output_noun="Jawaban",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     else:
@@ -640,6 +655,7 @@ def get_indonli_nli_id_spec(zeroshot=False) -> RunSpec:
             instructions="Anda akan diberikan dua kalimat, X dan Y.\nTentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah hanya dengan menggunakan satu huruf A, B atau C.",
             output_noun="Jawaban",
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     scenario_spec = ScenarioSpec(
@@ -679,6 +695,7 @@ def generate_xnli_run_spec(zeroshot=False, language="vi"):
             input_suffix=xnli_prompts[language]['input_suffix'],
             output_noun=xnli_prompts[language]['output_noun'],
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
     
     else:
@@ -686,6 +703,7 @@ def generate_xnli_run_spec(zeroshot=False, language="vi"):
             instructions=xnli_prompts[language]['instructions'] + '\n' + xnli_prompts[language]['input_suffix'],
             output_noun=xnli_prompts[language]['output_noun'],
             max_train_instances=max_train_instances,
+            max_tokens=1,
         )
 
     scenario_spec = ScenarioSpec(
@@ -742,6 +760,7 @@ def generate_xcopa_run_spec(zeroshot=False, language="id"):
         input_noun=xcopa_prompts[language]['input_noun'],
         output_noun=xcopa_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
+        max_tokens=1,
     )
 
     scenario_spec = ScenarioSpec(
@@ -798,6 +817,7 @@ def generate_lindsea_mp_run_spec(zeroshot=False, language="id") -> RunSpec:
         input_suffix=lindsea_mp_prompts[language]['input_suffix'],
         output_noun=lindsea_mp_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
+        max_tokens=1,
     )
 
     scenario_spec = ScenarioSpec(
@@ -838,6 +858,7 @@ def generate_lindsea_pr_run_spec(zeroshot=False, language="id") -> RunSpec:
         instructions=lindsea_pr_prompts[language]['instructions'],
         output_noun=lindsea_pr_prompts[language]['output_noun'],
         max_train_instances=max_train_instances,
+        max_tokens=1,
     )
 
     scenario_spec = ScenarioSpec(
