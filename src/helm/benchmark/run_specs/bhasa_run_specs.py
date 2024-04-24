@@ -611,7 +611,7 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
             input_suffix="பின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
-            max_tokens=1,
+            max_tokens=2,
         )
     
     else:
@@ -619,7 +619,7 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
             instructions="உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.\nபின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             output_noun="பதில்",
             max_train_instances=max_train_instances,
-            max_tokens=1,
+            max_tokens=2,
         )
 
     scenario_spec = ScenarioSpec(

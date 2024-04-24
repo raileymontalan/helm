@@ -43,12 +43,18 @@ class IndicQA_QA_TA_Scenario(Scenario):
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("ai4bharat/IndicQA", "indicqa.ta")
-        dataset = dataset['test'].train_test_split(test_size=0.8)
-
+        df = dataset['test'].to_pandas()
+        df_test = df.sample(n=100, random_state=7901)
+        df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
+        dataset = {
+            'train': df_train,
+            'test': df_test,
+        }
+        
         outputs = []
         for split in list(dataset.keys()):
-            df = dataset[split].to_pandas()
-            data = df.sample(n=100, random_state=7901)
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 if len(row["answers"]["text"][0].strip()) > 0:
                     passage = row["context"].strip()
@@ -128,6 +134,7 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.sample(n=100, random_state=5018)
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = row["passage_text"].strip()
                 question = row["question_text"].strip()
@@ -190,23 +197,29 @@ class XQuAD_QA_Scenario(Scenario):
             "th": {
                 "passage_prefix": "ข้อความ: ",
                 "question_prefix": "คำถาม: ",
-                "random_seed": 4520,
+                "random_state": 4520,
             },
             "vi": {
                 "passage_prefix": "Đoạn văn: ",
                 "question_prefix": "Câu hỏi: ",
-                "random_seed": 4502,
+                "random_state": 4502,
             }
         }
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("xquad", f"xquad.{self.language}")
-        dataset = dataset['validation'].train_test_split(test_size=0.8)
-
+        df = dataset['validation'].to_pandas()
+        df_test = df.sample(n=100, random_state=self.map[self.language]["random_state"])
+        df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
+        dataset = {
+            'train': df_train,
+            'test': df_test,
+        }
+        
         outputs = []
         for split in list(dataset.keys()):
-            df = dataset[split].to_pandas()
-            data = df.sample(n=100, random_state=self.map[self.language]["random_state"])
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 passage = row["context"].strip()
                 question = row["question"].strip()
@@ -277,6 +290,7 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.dropna(subset=["INDIC REVIEW", "LABEL"])
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["INDIC REVIEW"].strip())
                 output = Output(text=self.sentiment2label[row["LABEL"]])
@@ -343,20 +357,21 @@ class NusaX_SA_ID_Scenario(Scenario):
             "valid": "https://raw.githubusercontent.com/IndoNLP/nusax/main/datasets/sentiment/indonesian/valid.csv",
         }
 
-        data = {}
+        dataset = {}
         for split in list(URLS.keys()):
-            data[split] = []
+            dataset[split] = []
             target_path_file = os.path.join(output_path, split)
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
-            df = pd.read_csv(target_path_file)
-            data[split] = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
-        return data
+            dataset[split] = pd.read_csv(target_path_file)
+        return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
+        dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(data.keys()):
-            for index, row in data[split].iterrows():
+        for split in list(dataset.keys()):
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
+            for index, row in data.iterrows():
                 input = Input(row["text"].strip())
                 output = Output(text=self.sentiment2label[row["label"]])
                 references = [
@@ -425,20 +440,22 @@ class Wisesight_SA_TH_Scenario(Scenario):
         data_path = os.path.join(output_path, "data")
         ensure_file_downloaded(source_url=URL, target_path=data_path, unpack=True)
 
-        data = {}
+        dataset = {}
         for split in self.splits.keys():
-            data[split] = []
+            dataset[split] = []
             target_path_file = os.path.join(data_path, "data", f"{split}.jsonl")
             df = pd.read_json(target_path_file, lines=True)
             df = df[df["category"] != "q"]
-            data[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
-        return data
+            dataset[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
+        return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
+        dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(data.keys()):
-            for index, row in data[split].iterrows():
+        for split in list(dataset.keys()):
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
+            for index, row in data.iterrows():
                 input = Input(row["texts"].strip())
                 output = Output(text=self.sentiment2label[row["category"]])
                 references = [
@@ -514,26 +531,32 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
             },
         }
 
-        data = {}
+        dataset = {}
         for split in list(URLS.keys()):
-            data[split] = {}
+            dataset[split] = {}
             for file in list(URLS[split].keys()):
-                data[split][file] = []
+                dataset[split][file] = []
                 target_path_file = os.path.join(output_path, split, file)
                 ensure_file_downloaded(source_url=URLS[split][file], target_path=target_path_file)
                 with open(target_path_file, 'r') as f:
                     lines = f.readlines()
                     for line in lines:
-                        data[split][file].append(str(line).strip())
-        return data
+                        dataset[split][file].append(str(line).strip())
+            dataset[split] = pd.DataFrame({
+                "text": dataset[split]['sentences'],
+                "label": dataset[split]['sentiments']
+            })
+        return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
+        dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(data.keys()):
-            for i, r in zip(data[split]['sentences'], data[split]['sentiments']):
-                input = Input(i)
-                output = Output(text=self.id2label[int(r)])
+        for split in list(dataset.keys()):
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
+            for index, row in data.iterrows():
+                input = Input(row['text'])
+                output = Output(text=self.id2label[int(row['label'])])
                 references = [
                     Reference(output, tags=[CORRECT_TAG]),
                 ]
@@ -598,14 +621,14 @@ class MLHSD_TD_ID_Scenario(Scenario):
         target_path_file = os.path.join(output_path, "mlhsd")
         ensure_file_downloaded(source_url=URL, target_path=target_path_file)
         df = pd.read_csv(target_path_file, encoding="ISO-8859-1")
-        df['label'] = df.apply(lambda x: get_label(x))
-        df = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=7123))
-
-        split_index = int(len(df)*0.8)
-        data = {}
-        data['train'] = df.iloc[:split_index]
-        data['test'] = df.iloc[split_index:]
-        return data
+        df['label'] = df.apply(lambda x: self.get_label(x), axis=1)
+        df_test = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=7123))
+        df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
+        dataset = {
+            'train': df_train,
+            'test': df_test,
+        }
+        return dataset
     
     def get_label(self, row) -> str:
         if int(row["HS"]) == 1:
@@ -616,10 +639,12 @@ class MLHSD_TD_ID_Scenario(Scenario):
             return "A"
 
     def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
+        dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(data.keys()):
-            for index, row in data[split].iterrows():
+        for split in list(dataset.keys()):
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
+            for index, row in data.iterrows():
                 input = Input(row["Tweet"].strip())
                 output = Output(text=row['label'])
                 references = [
@@ -672,14 +697,20 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("thai_toxicity_tweet")
-        dataset = dataset['train'].train_test_split(test_size=0.8)
-
+        df = dataset['train'].to_pandas()
+        df = df[df["tweet_text"].str.len() > 0]
+        df = df[df["tweet_text"]!= "TWEET_NOT_FOUND"]
+        df_test = df.groupby("is_toxic", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+        df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
+        dataset = {
+            'train': df_train,
+            'test': df_test,
+        }
+        
         outputs = []
         for split in list(dataset.keys()):
-            df = dataset[split].to_pandas()
-            df = df[df["tweet_text"].str.len() > 0]
-            df = df[df["tweet_text"]!= "TWEET_NOT_FOUND"]
-            data = df.groupby("is_toxic", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["tweet_text"].strip())
                 output = Output(text=self.id2label[int(row["is_toxic"])])
@@ -747,19 +778,21 @@ class ViHSD_TD_VI_Scenario(Scenario):
         data_path = os.path.join(output_path, "data")
         ensure_file_downloaded(source_url=URL, target_path=data_path, unpack=True)
 
-        data = {}
+        dataset = {}
         for split in self.splits.keys():
-            data[split] = []
+            dataset[split] = []
             target_path_file = os.path.join(data_path, "vihsd", f"{split}.csv")
             df = pd.read_csv(target_path_file)
-            data[split] = df.groupby("label_id", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4878))
-        return data
+            dataset[split] = df.groupby("label_id", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4878))
+        return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
+        dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(data.keys()):
-            for index, row in data[split].iterrows():
+        for split in list(dataset.keys()):
+            data = dataset[split]
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
+            for index, row in data.iterrows():
                 input = Input(str(row["free_text"]).strip())
                 output = Output(text=self.id2label[int(row["label_id"])])
                 references = [
@@ -828,6 +861,7 @@ class Flores_MT_Scenario(Scenario):
             source_df = source_dataset[split].to_pandas()
             target_df = target_dataset[split].to_pandas()
             data = source_df.join(target_df, lsuffix="_source", rsuffix="_target")
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.pair}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["sentence_source"].strip())
                 output = Output(row["sentence_target"].strip())
@@ -888,7 +922,6 @@ class XLSum_AS_Scenario(Scenario):
         self.splits = {
             'train': TRAIN_SPLIT,
             'test': TEST_SPLIT,
-            'validation': VALID_SPLIT
         }
 
         self.map = {
@@ -915,9 +948,9 @@ class XLSum_AS_Scenario(Scenario):
 
         outputs = []
         for split in self.splits.keys():
-            data = dataset[split].to_pandas()
-            if split == 'test':
-                data = data.sample(n=100, random_state=self.map[self.language]['random_state'])
+            df = dataset[split].to_pandas()
+            data = df.sample(n=100, random_state=self.map[self.language]['random_state'])
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["text"].strip())
                 output = Output(row["summary"].strip())
@@ -985,6 +1018,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1042,9 +1076,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'validation': VALID_SPLIT,
-            'test_expert': TEST_SPLIT,
-            'test_lay': TEST_SPLIT,
+            'test': TEST_SPLIT,
         }
         self.id2label = {
             0: 'A',
@@ -1052,13 +1084,29 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
             2: 'C'
         }
 
-    def get_instances(self, output_path) -> List[Instance]:
-        dataset = datasets.load_dataset("indonli")
+    def download_dataset(self, output_path: str):
+        URLS = {
+            'train': "https://github.com/ir-nlp-csui/indonli/blob/main/data/indonli/train.jsonl",
+            'test': "https://github.com/ir-nlp-csui/indonli/blob/main/data/indonli/test_lay.jsonl"
+        }
 
+        dataset = {}
+        for split in list(URLS.keys()):
+            dataset[split] = []
+            target_path_file = os.path.join(output_path, split)
+            ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
+            df = pd.read_json(target_path_file, lines=True)
+            df = df[df["category"] != "q"]
+            dataset[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
+        return dataset
+
+    def get_instances(self, output_path) -> List[Instance]:
+        dataset = self.download_dataset(output_path)
         outputs = []
         for split in list(dataset.keys()):
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1137,6 +1185,7 @@ class XNLI_NLI_Scenario(Scenario):
         for split in list(dataset.keys()):
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1237,6 +1286,7 @@ class XCOPA_CR_Scenario(Scenario):
             language_df = language_dataset[split].to_pandas()
             tamil_df = tamil_dataset[split].to_pandas()
             data = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
                 passage = "{premise}\n{instruction1}\nA: {choice1}\nB:{choice2}\n{instruction2}".format(
@@ -1319,9 +1369,9 @@ class LINDSEA_MP_Scenario(Scenario):
             target_path_file = os.path.join(output_path, file)
             ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
             data_files[file] = pd.read_json(target_path_file, lines=True)
-        data = pd.concat(data_files)
+        dataset = pd.concat(data_files)
         
-        return data
+        return dataset
 
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -1331,6 +1381,7 @@ class LINDSEA_MP_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split].to_pandas()
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(text=self.prompt[self.language]['question'])
                 references = [
@@ -1419,11 +1470,10 @@ class LINDSEA_PR_Scenario(Scenario):
             target_path_file = os.path.join(output_path, file)
             ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
             data_files[file] = pd.read_json(target_path_file, lines=True)
-        data = pd.concat(data_files.values(), ignore_index=True)
-        data['label'] = data['label'].astype(str)
-        data['label'] = data['label'].apply(self.get_mapping)
-        print(data['label'])
-        return data
+        dataset = pd.concat(data_files.values(), ignore_index=True)
+        dataset['label'] = dataset['label'].astype(str)
+        dataset['label'] = dataset['label'].apply(self.get_mapping)
+        return dataset
 
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -1433,6 +1483,7 @@ class LINDSEA_PR_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split].to_pandas()
+            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 if row['question']:
                     text = self.prompt[self.language]['question1'] + "\n"
