@@ -54,7 +54,6 @@ class IndicQA_QA_TA_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 if len(row["answers"]["text"][0].strip()) > 0:
                     passage = row["context"].strip()
@@ -134,7 +133,6 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.sample(n=100, random_state=5018)
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = row["passage_text"].strip()
                 question = row["question_text"].strip()
@@ -219,7 +217,6 @@ class XQuAD_QA_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 passage = row["context"].strip()
                 question = row["question"].strip()
@@ -244,8 +241,7 @@ class XQuAD_QA_Scenario(Scenario):
 class IndicSentiment_SA_TA_Scenario(Scenario):
     """
     This is a Tamil sentiment analysis scenario. The data comes from IndicXTREME, and consists of product reviews
-    that were written by annotators. Labels are positive or negative. For this scenario, the `validation` split is
-    used as the `train` split for in-context examples. 
+    that were written by annotators. Labels are positive or negative.
 
     The models are prompted using the following format:
 
@@ -290,7 +286,6 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.dropna(subset=["INDIC REVIEW", "LABEL"])
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["INDIC REVIEW"].strip())
                 output = Output(text=self.sentiment2label[row["LABEL"]])
@@ -370,7 +365,6 @@ class NusaX_SA_ID_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["text"].strip())
                 output = Output(text=self.sentiment2label[row["label"]])
@@ -454,7 +448,6 @@ class Wisesight_SA_TH_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["texts"].strip())
                 output = Output(text=self.sentiment2label[row["category"]])
@@ -553,7 +546,6 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row['text'])
                 output = Output(text=self.id2label[int(row['label'])])
@@ -643,7 +635,6 @@ class MLHSD_TD_ID_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["Tweet"].strip())
                 output = Output(text=row['label'])
@@ -710,7 +701,6 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["tweet_text"].strip())
                 output = Output(text=self.id2label[int(row["is_toxic"])])
@@ -791,7 +781,6 @@ class ViHSD_TD_VI_Scenario(Scenario):
         outputs = []
         for split in list(dataset.keys()):
             data = dataset[split]
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(str(row["free_text"]).strip())
                 output = Output(text=self.id2label[int(row["label_id"])])
@@ -861,7 +850,6 @@ class Flores_MT_Scenario(Scenario):
             source_df = source_dataset[split].to_pandas()
             target_df = target_dataset[split].to_pandas()
             data = source_df.join(target_df, lsuffix="_source", rsuffix="_target")
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.pair}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["sentence_source"].strip())
                 output = Output(row["sentence_target"].strip())
@@ -907,12 +895,10 @@ class XLSum_AS_Scenario(Scenario):
         url = "https://aclanthology.org/2021.findings-acl.413",
         pages = "4693--4703",
     }
-
-
     """
 
     name = "xlsum_as"
-    description = "XLSUm abstractive summarization dataset"
+    description = "XLSum abstractive summarization dataset"
     tags = ["abstractive_summarization"]
 
     def __init__(self, language: str):
@@ -950,7 +936,6 @@ class XLSum_AS_Scenario(Scenario):
         for split in self.splits.keys():
             df = dataset[split].to_pandas()
             data = df.sample(n=100, random_state=self.map[self.language]['random_state'])
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 input = Input(row["text"].strip())
                 output = Output(row["summary"].strip())
@@ -980,7 +965,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
          ேநர்மைற/எதிர் மைற
 
     Target completion:
-        <sentiment> (<sentiment>:positive or negative or neutral)
+        <answer>
 
     @misc{https://doi.org/10.48550/arxiv.2204.08776,
         doi = {10.48550/ARXIV.2204.08776},
@@ -1018,7 +1003,6 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         for split in self.splits:
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1053,7 +1037,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
         Jawaban: 
 
     Target completion:
-        <answer> (<answer>:entailment, contradiction, or neutral)
+        <answer>
 
     @inproceedings{mahendra-etal-2021-indonli,
         title = "{I}ndo{NLI}: A Natural Language Inference Dataset for {I}ndonesian",
@@ -1106,7 +1090,6 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
         for split in list(dataset.keys()):
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1141,7 +1124,7 @@ class XNLI_NLI_Scenario(Scenario):
         Answer:
 
     Target completion:
-        <answer> (<answer>:entailment, neutral, or contradiction)
+        <answer>
 
     @InProceedings{conneau2018xnli,
         author = {Conneau, Alexis
@@ -1185,7 +1168,6 @@ class XNLI_NLI_Scenario(Scenario):
         for split in list(dataset.keys()):
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1215,7 +1197,7 @@ class XCOPA_CR_Scenario(Scenario):
         Answer:
 
     Target completion:
-        <answer> (<answer>:entailment, neutral, or contradiction)
+        <answer>
 
     @article{ponti2020xcopa,
     title={{XCOPA: A} Multilingual Dataset for Causal Commonsense Reasoning},
@@ -1286,7 +1268,6 @@ class XCOPA_CR_Scenario(Scenario):
             language_df = language_dataset[split].to_pandas()
             tamil_df = tamil_dataset[split].to_pandas()
             data = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
             for index, row in data.iterrows():
                 instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
                 passage = "{premise}\n{instruction1}\nA: {choice1}\nB:{choice2}\n{instruction2}".format(
@@ -1311,198 +1292,196 @@ class XCOPA_CR_Scenario(Scenario):
     
 # LD
     
-class LINDSEA_MP_Scenario(Scenario):
-    """
-    This is a LINDSEA minimal pairs (linguistic diagnostic for syntax) scenario. The data comes from the BHASA LINDSEA dataset.
+# class LINDSEA_MP_Scenario(Scenario):
+#     """
+#     This is a LINDSEA minimal pairs (linguistic diagnostic for syntax) scenario. The data comes from the BHASA LINDSEA dataset.
 
-    The models are prompted using the following general format:
+#     The models are prompted using the following general format:
 
-        System Prompt:
-        You are a <language> linguist
-        Human Prompt:
-        Which sentence is more acceptable?
-        A: <sentence1>
-        B: <sentence2>
-        Answer with A or B only.
+#         System Prompt:
+#         You are a <language> linguist
+#         Human Prompt:
+#         Which sentence is more acceptable?
+#         A: <sentence1>
+#         B: <sentence2>
+#         Answer with A or B only.
 
-    Target completion:
-        <choice>
+#     Target completion:
+#         <choice>
 
-    @misc{leong2023bhasa,
-        title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
-        author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
-        year={2023},
-        eprint={2309.06085},
-        archivePrefix={arXiv},
-        primaryClass={cs.CL}
-    }
-    """
+#     @misc{leong2023bhasa,
+#         title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
+#         author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
+#         year={2023},
+#         eprint={2309.06085},
+#         archivePrefix={arXiv},
+#         primaryClass={cs.CL}
+#     }
+#     """
 
-    name = "lindsea_mp"
-    description = "LINDSEA minimal pairs dataset"
-    tags = ["minimal_pairs", "linguistic_diagnostic", "syntax"]
+#     name = "lindsea_mp"
+#     description = "LINDSEA minimal pairs dataset"
+#     tags = ["minimal_pairs", "linguistic_diagnostic", "syntax"]
 
-    def __init__(self, language: str):
-        super().__init__()
-        self.language = language
-        self.splits = {
-            'train': TRAIN_SPLIT,
-            'test': TEST_SPLIT
-        }
-        self.prompt = {
-            "id": {
-                "question": "Kalimat mana yang lebih mungkin?",
-            },
-        }
+#     def __init__(self, language: str):
+#         super().__init__()
+#         self.language = language
+#         self.splits = {
+#             'train': TRAIN_SPLIT,
+#             'test': TEST_SPLIT
+#         }
+#         self.prompt = {
+#             "id": {
+#                 "question": "Kalimat mana yang lebih mungkin?",
+#             },
+#         }
 
-    def download_dataset(self, output_path: str):
-        URLS = {
-            "npis_and_negation": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/NPIs_and_negation.jsonl",
-            "argument_structure": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/argument_structure.jsonl",
-            "filler_gap_dependencies": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/filler-gap_dependencies.jsonl",
-            "morphology": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/morphology.jsonl",
-        }
+#     def download_dataset(self, output_path: str):
+#         URLS = {
+#             "npis_and_negation": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/NPIs_and_negation.jsonl",
+#             "argument_structure": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/argument_structure.jsonl",
+#             "filler_gap_dependencies": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/filler-gap_dependencies.jsonl",
+#             "morphology": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/morphology.jsonl",
+#         }
         
-        data_files = {}
-        for file in list(URLS.keys()):
-            data_files[file] = []
-            target_path_file = os.path.join(output_path, file)
-            ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
-            data_files[file] = pd.read_json(target_path_file, lines=True)
-        dataset = pd.concat(data_files)
+#         data_files = {}
+#         for file in list(URLS.keys()):
+#             data_files[file] = []
+#             target_path_file = os.path.join(output_path, file)
+#             ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
+#             data_files[file] = pd.read_json(target_path_file, lines=True)
+#         dataset = pd.concat(data_files)
         
-        return dataset
+#         return dataset
 
 
-    def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
-        dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
+#     def get_instances(self, output_path) -> List[Instance]:
+#         data = self.download_dataset(output_path)
+#         dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
         
-        outputs = []
-        for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
-            for index, row in data.iterrows():
-                input = Input(text=self.prompt[self.language]['question'])
-                references = [
-                    Reference(Output(text=row["correct"].strip()), tags=[CORRECT_TAG]),
-                    Reference(Output(text=row["wrong"].strip()), tags=[]),
-                ]
-                random.shuffle(references) # Shuffle order of references
-                instance = Instance(
-                    input=input,
-                    references=references, 
-                    split=self.splits[split]
-                )
-                outputs.append(instance)
-        return outputs
+#         outputs = []
+#         for split in list(dataset.keys()):
+#             data = dataset[split].to_pandas()
+#             for index, row in data.iterrows():
+#                 input = Input(text=self.prompt[self.language]['question'])
+#                 references = [
+#                     Reference(Output(text=row["correct"].strip()), tags=[CORRECT_TAG]),
+#                     Reference(Output(text=row["wrong"].strip()), tags=[]),
+#                 ]
+#                 random.shuffle(references) # Shuffle order of references
+#                 instance = Instance(
+#                     input=input,
+#                     references=references, 
+#                     split=self.splits[split]
+#                 )
+#                 outputs.append(instance)
+#         return outputs
     
-class LINDSEA_PR_Scenario(Scenario):
-    """
-    This is a LINDSEA pragmatic reasoning scenario. The data comes from the BHASA LINDSEA dataset.
+# class LINDSEA_PR_Scenario(Scenario):
+#     """
+#     This is a LINDSEA pragmatic reasoning scenario. The data comes from the BHASA LINDSEA dataset.
 
-    For single sentence questions, the models are prompted using the following general format:
+#     For single sentence questions, the models are prompted using the following general format:
 
-        System Prompt:
-        You are a <language> linguist
-        Human Prompt:
-        Is the following statement true or false?
-        Statement: <sentence>
-        Answer only with True or False.
+#         System Prompt:
+#         You are a <language> linguist
+#         Human Prompt:
+#         Is the following statement true or false?
+#         Statement: <sentence>
+#         Answer only with True or False.
 
-    For double sentence questions, the models are prompted using the following general format:
+#     For double sentence questions, the models are prompted using the following general format:
 
-        System Prompt:
-        You are a <language> linguist
-        Human Prompt:
-        Situation: <premise>
-        Given this situation, is the following statement true or false?
-        Statement: <sentence>
-        Answer only with True or False.
+#         System Prompt:
+#         You are a <language> linguist
+#         Human Prompt:
+#         Situation: <premise>
+#         Given this situation, is the following statement true or false?
+#         Statement: <sentence>
+#         Answer only with True or False.
 
-    Target completion:
-        <answer>
+#     Target completion:
+#         <answer>
 
-    @misc{leong2023bhasa,
-        title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
-        author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
-        year={2023},
-        eprint={2309.06085},
-        archivePrefix={arXiv},
-        primaryClass={cs.CL}
-    }
-    """
+#     @misc{leong2023bhasa,
+#         title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
+#         author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
+#         year={2023},
+#         eprint={2309.06085},
+#         archivePrefix={arXiv},
+#         primaryClass={cs.CL}
+#     }
+#     """
 
-    name = "lindsea_pr"
-    description = "LINDSEA pragmatic reasoning dataset"
-    tags = ["pragmatic_reasoning", "linguistic_diagnostic", "pragmatics"]
+#     name = "lindsea_pr"
+#     description = "LINDSEA pragmatic reasoning dataset"
+#     tags = ["pragmatic_reasoning", "linguistic_diagnostic", "pragmatics"]
 
-    def __init__(self, language: str):
-        super().__init__()
-        self.language = language
-        self.splits = {
-            'train': TRAIN_SPLIT,
-            'test': TEST_SPLIT
-        }
-        self.prompt = {
-            "id": {
-                "question1": "Apakah pernyataan berikut ini benar atau salah?",
-                "question2": "Berdasarkan situasi ini, apakah pernyataan berikut ini benar atau salah?",
-                "situation": "Situasi",
-                "statement": "Pernyataan",
-                "True": "Benar",
-                "False": "Salah",
-            },
-        }
+#     def __init__(self, language: str):
+#         super().__init__()
+#         self.language = language
+#         self.splits = {
+#             'train': TRAIN_SPLIT,
+#             'test': TEST_SPLIT
+#         }
+#         self.prompt = {
+#             "id": {
+#                 "question1": "Apakah pernyataan berikut ini benar atau salah?",
+#                 "question2": "Berdasarkan situasi ini, apakah pernyataan berikut ini benar atau salah?",
+#                 "situation": "Situasi",
+#                 "statement": "Pernyataan",
+#                 "True": "Benar",
+#                 "False": "Salah",
+#             },
+#         }
 
-    def get_mapping(self, x):
-        return self.prompt[self.language][x.strip().capitalize()]
+#     def get_mapping(self, x):
+#         return self.prompt[self.language][x.strip().capitalize()]
 
-    def download_dataset(self, output_path: str):
-        URLS = {
-            "pragmatic_reasoning_pair": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/pragmatics/pragmatic_reasoning_pair.jsonl",
-            # "pragmatic_reasoning_single": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/pragmatics/pragmatic_reasoning_single.jsonl",
-        }
+#     def download_dataset(self, output_path: str):
+#         URLS = {
+#             "pragmatic_reasoning_pair": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/pragmatics/pragmatic_reasoning_pair.jsonl",
+#             "pragmatic_reasoning_single": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/pragmatics/pragmatic_reasoning_single.jsonl",
+#         }
         
-        data_files = {}
-        for file in list(URLS.keys()):
-            data_files[file] = []
-            target_path_file = os.path.join(output_path, file)
-            ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
-            data_files[file] = pd.read_json(target_path_file, lines=True)
-        dataset = pd.concat(data_files.values(), ignore_index=True)
-        dataset['label'] = dataset['label'].astype(str)
-        dataset['label'] = dataset['label'].apply(self.get_mapping)
-        return dataset
+#         data_files = {}
+#         for file in list(URLS.keys()):
+#             data_files[file] = []
+#             target_path_file = os.path.join(output_path, file)
+#             ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
+#             data_files[file] = pd.read_json(target_path_file, lines=True)
+#         dataset = pd.concat(data_files.values(), ignore_index=True)
+#         dataset['label'] = dataset['label'].astype(str)
+#         dataset['label'] = dataset['label'].apply(self.get_mapping)
+#         return dataset
 
 
-    def get_instances(self, output_path) -> List[Instance]:
-        data = self.download_dataset(output_path)
-        dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
+#     def get_instances(self, output_path) -> List[Instance]:
+#         data = self.download_dataset(output_path)
+#         dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
         
-        outputs = []
-        for split in list(dataset.keys()):
-            data = dataset[split].to_pandas()
-            data.to_csv(f"benchmark_output/scenario_instances/{self.name}_{self.language}_{split}.csv")
-            for index, row in data.iterrows():
-                if row['question']:
-                    text = self.prompt[self.language]['question1'] + "\n"
-                    text += f"{self.prompt[self.language]['statement']}: " + row['text']
-                    input = Input(text=text)
-                else:
-                    text = self.prompt[self.language]['situation'] + ": "
-                    text += row['text'] + "\n"
-                    text += self.prompt[self.language]['question2'] + "\n" 
-                    text += f"{self.prompt[self.language]['statement']}: " + row['conclusion']
-                    input = Input(text=text)
-                references = [
-                    Reference(Output(text=self.prompt[self.language][row["label"]]), tags=[CORRECT_TAG]),
-                ]
-                random.shuffle(references) # Shuffle order of references
-                instance = Instance(
-                    input=input,
-                    references=references, 
-                    split=self.splits[split]
-                )
-                outputs.append(instance)
-        return outputs
+#         outputs = []
+#         for split in list(dataset.keys()):
+#             data = dataset[split].to_pandas()
+#             for index, row in data.iterrows():
+#                 if row['question']:
+#                     text = self.prompt[self.language]['question1'] + "\n"
+#                     text += f"{self.prompt[self.language]['statement']}: " + row['text']
+#                     input = Input(text=text)
+#                 else:
+#                     text = self.prompt[self.language]['situation'] + ": "
+#                     text += row['text'] + "\n"
+#                     text += self.prompt[self.language]['question2'] + "\n" 
+#                     text += f"{self.prompt[self.language]['statement']}: " + row['conclusion']
+#                     input = Input(text=text)
+#                 references = [
+#                     Reference(Output(text=self.prompt[self.language][row["label"]]), tags=[CORRECT_TAG]),
+#                 ]
+#                 random.shuffle(references) # Shuffle order of references
+#                 instance = Instance(
+#                     input=input,
+#                     references=references, 
+#                     split=self.splits[split]
+#                 )
+#                 outputs.append(instance)
+#         return outputs
