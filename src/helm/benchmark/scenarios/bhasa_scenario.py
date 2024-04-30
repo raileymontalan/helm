@@ -284,8 +284,8 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
 
         outputs = []
         for split in self.splits:
-            df = dataset[split].to_pandas()
-            data = df.dropna(subset=["INDIC REVIEW", "LABEL"])
+            data = dataset[split].to_pandas()
+            data["LABEL"] = data["LABEL"].fillna("Positive")
             for index, row in data.iterrows():
                 input = Input(row["INDIC REVIEW"].strip())
                 output = Output(text=self.sentiment2label[row["LABEL"]])
