@@ -40,14 +40,14 @@ class AISingaporeTokenizer(CachingTokenizer):
         try:
             return WrappedPreTrainedTokenizer(
                 AutoTokenizer.from_pretrained(
-                    pretrained_model_name_or_path, local_files_only=True, trust_remote_code=True, revision="refactor_files", **kwargs
+                    pretrained_model_name_or_path, local_files_only=True, trust_remote_code=True, **kwargs
                 )
             )
         except OSError:
             hlog(f"Local files do not exist for HuggingFace tokenizer: {pretrained_model_name_or_path}. Downloading...")
             return WrappedPreTrainedTokenizer(
                 AutoTokenizer.from_pretrained(
-                    pretrained_model_name_or_path, local_files_only=False, trust_remote_code=True, revision="refactor_files", **kwargs
+                    pretrained_model_name_or_path, local_files_only=False, trust_remote_code=True, **kwargs
                 )
             )
 

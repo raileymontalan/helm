@@ -62,7 +62,7 @@ class AISingaporeServer:
         with htrack_block(f"Loading Hugging Face model {pretrained_model_name_or_path}"):
             # WARNING this may fail if your GPU does not have enough memory
             self.model = AutoModelForCausalLM.from_pretrained(
-                pretrained_model_name_or_path, trust_remote_code=True, revision="refactor_files", **kwargs
+                pretrained_model_name_or_path, device_map="auto", offload_folder="offload", trust_remote_code=True, **kwargs
             ).to(self.device)
         with htrack_block(f"Loading Hugging Face tokenizer for model {pretrained_model_name_or_path}"):
             self.wrapped_tokenizer: WrappedPreTrainedTokenizer = AISingaporeTokenizer.create_tokenizer(

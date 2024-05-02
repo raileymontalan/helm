@@ -24,7 +24,6 @@ from pythainlp.tokenize import word_tokenize
 
 import numpy as np
 from sacrebleu.metrics import CHRF
-from evaluate import load
     
 class BhasaMachineTranslationMetric(Metric):
     """Machine Translation Metrics
