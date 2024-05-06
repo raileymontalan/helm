@@ -2,7 +2,7 @@ import datasets, random, os
 import pandas as pd
 from typing import List
 
-from .scenario import Scenario, Instance, Reference, TRAIN_SPLIT, VALID_SPLIT, TEST_SPLIT, CORRECT_TAG, Input, Output, PassageQuestionInput
+from .scenario import Scenario, Instance, Reference, TRAIN_SPLIT, TEST_SPLIT, CORRECT_TAG, Input, Output, PassageQuestionInput
 from helm.common.general import ensure_file_downloaded
 
 # NLU
@@ -13,10 +13,17 @@ class IndicQA_QA_TA_Scenario(Scenario):
 
     The models are prompted using the following format:
 
-        உங்களுக்கு ஒரு பத்தியும் ஒரு கேள்வியும் தரப்படும். தரப்பட்ட பத்தியிலிருந்து கேள்விக்கான பதிலைக் கண்டறியவும். கேள்விக்குப் பதிலளிக்கமுடியாவிட்டால் ஒற்றை எழுத்து X இனைப் பதிலாக அளிக்கவும்.
-        பத்தி: {text}
-        கேள்வி: {question}
-        பதில்: 
+        உங்களுக்கு ஒரு பத்தியும் ஒரு கேள்வியும் தரப்படும். தரப்பட்ட பத்தியிலிருந்து கேள்விக்கான பதிலைக் கண்டறியவும்.
+
+        பத்தி: <text>
+        கேள்வி: <question>
+        பதில்: <answer>
+
+        ...
+
+        பத்தி: <text>
+        கேள்வி: <question>
+        பதில்:
 
     Target completion:
         <answer>
@@ -44,7 +51,7 @@ class IndicQA_QA_TA_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("ai4bharat/IndicQA", "indicqa.ta")
         df = dataset['test'].to_pandas()
-        df_test = df.sample(n=100, random_state=7901)
+        df_test = df.sample(n=100, random_state=7900)
         df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
         dataset = {
             'train': df_train,
@@ -52,7 +59,7 @@ class IndicQA_QA_TA_Scenario(Scenario):
         }
         
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 if len(row["answers"]["text"][0].strip()) > 0:
@@ -84,9 +91,17 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
     The models are prompted using the following format:
 
         Anda akan diberikan sebuah paragraf dan sebuah pertanyaan. Jawablah pertanyaannya dengan mengekstrak jawaban dari paragraf tersebut.
+
+        Paragraf: <text>
+        Pertanyaan: <question>
+        Jawaban: <answer>
+
+        ...
+
         Paragraf: <text>
         Pertanyaan: <question>
         Jawaban: 
+
 
     Target completion:
         <answer>
@@ -115,7 +130,7 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
         }
     """
 
-    name = "tydiqa_goldp_qa_ta"
+    name = "tydiqa_goldp_qa_id"
     description = "TyDiQA GoldP question answering dataset"
     tags = ["question_answering"]
 
@@ -130,7 +145,7 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
         dataset = datasets.load_dataset("khalidalt/tydiqa-goldp", "indonesian")
 
         outputs = []
-        for split in self.splits:
+        for split in self.splits.keys():
             df = dataset[split].to_pandas()
             data = df.sample(n=100, random_state=5018)
             for index, row in data.iterrows():
@@ -162,8 +177,15 @@ class XQuAD_QA_Scenario(Scenario):
     The models are prompted using the following general format:
 
         You will be given a paragraph and a question. Answer the question by extracting the answer from the paragraph.
-        Paragraph: {text}
-        Question: {question}
+
+        Paragraph: <text>
+        Question: <question>
+        Answer: <answer>
+
+        ...
+
+        Paragraph: <text>
+        Question: <question>
         Answer:
 
     Target completion:
@@ -215,7 +237,7 @@ class XQuAD_QA_Scenario(Scenario):
         }
         
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 passage = row["context"].strip()
@@ -246,11 +268,17 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
     The models are prompted using the following format:
 
         பின்வரும் வாக்கியத்தில் வெளிப்படுத்தப்படும் உணர்வு எது?
-        வாக்கியம்: <text>
         ஒரு சொல்லில் மட்டும் பதிலளிக்கவும்:
         - நேர்மறை
         - எதிர்மறை
-        பதில்: 
+
+        வாக்கியம்: <text>
+        பதில்:
+        
+        ...
+
+        வாக்கியம்: <text>
+        பதில்: <answer>
 
     Target completion:
         <sentiment> (<sentiment>:positive or negative)
@@ -283,7 +311,7 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
         dataset = datasets.load_dataset("ai4bharat/IndicSentiment", "translation-ta")
 
         outputs = []
-        for split in self.splits:
+        for split in self.splits.keys():
             data = dataset[split].to_pandas()
             data["LABEL"] = data["LABEL"].fillna("Positive")
             for index, row in data.iterrows():
@@ -308,12 +336,18 @@ class NusaX_SA_ID_Scenario(Scenario):
     The models are prompted using the following format:
 
         Apa sentimen dari kalimat berikut ini?
-        Kalimat: <text>
-        Jawab dengan satu kata saja:
+        Jawablah dengan satu kata saja:
         - Positif
         - Negatif
         - Netral
-        Jawaban: 
+
+        Kalimat: <text>
+        Jawaban: <sentiment>
+
+        ...
+
+        Kalimat: <text>
+        Jawaban:
 
     Target completion:
         <sentiment> (<sentiment>:positive or negative or neutral)
@@ -336,7 +370,6 @@ class NusaX_SA_ID_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'valid': VALID_SPLIT,
             'test': TEST_SPLIT
         }
         self.sentiment2label = {
@@ -349,11 +382,10 @@ class NusaX_SA_ID_Scenario(Scenario):
         URLS = {
             "test": "https://raw.githubusercontent.com/IndoNLP/nusax/main/datasets/sentiment/indonesian/test.csv",
             "train": "https://raw.githubusercontent.com/IndoNLP/nusax/main/datasets/sentiment/indonesian/train.csv",
-            "valid": "https://raw.githubusercontent.com/IndoNLP/nusax/main/datasets/sentiment/indonesian/valid.csv",
         }
 
         dataset = {}
-        for split in list(URLS.keys()):
+        for split in self.splits.keys():
             dataset[split] = []
             target_path_file = os.path.join(output_path, split)
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
@@ -363,7 +395,7 @@ class NusaX_SA_ID_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(row["text"].strip())
@@ -387,11 +419,17 @@ class Wisesight_SA_TH_Scenario(Scenario):
     The models are prompted using the following format:
 
         อารมณ์ความรู้สึกของข้อความต่อไปนี้เป็นอย่างไร?
-        ข้อความ: {text}
         โปรดตอบโดยใช้คำเดียวเท่านั้น:
         - แง่บวก
         - แง่ลบ
         - เฉยๆ
+
+        ข้อความ: <text>
+        คำตอบ: <sentiment>
+
+        ...
+
+        ข้อความ: <text>
         คำตอบ: 
 
     Target completion:
@@ -420,7 +458,6 @@ class Wisesight_SA_TH_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'valid': VALID_SPLIT,
             'test': TEST_SPLIT
         }
         self.sentiment2label = {
@@ -446,7 +483,7 @@ class Wisesight_SA_TH_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(row["texts"].strip())
@@ -471,11 +508,17 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
     The models are prompted using the following format:
 
         Sắc thái của câu sau đây là gì?
-        Câu: <text>
         Trả lời với một từ duy nhất:
         - Tích cực
         - Tiêu cực
         - Trung lập
+
+        Câu văn: <text>
+        Câu trả lời: <sentiment>
+
+        ...
+
+        Câu văn: <text>
         Câu trả lời: 
 
     Target completion:
@@ -499,7 +542,6 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'valid': VALID_SPLIT,
             'test': TEST_SPLIT
         }
         self.id2label = {
@@ -513,10 +555,6 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
             "train": {
                 "sentences": "https://drive.google.com/uc?id=1nzak5OkrheRV1ltOGCXkT671bmjODLhP&export=download",
                 "sentiments": "https://drive.google.com/uc?id=1ye-gOZIBqXdKOoi_YxvpT6FeRNmViPPv&export=download",
-            },
-            "valid": {
-                "sentences": "https://drive.google.com/uc?id=1sMJSR3oRfPc3fe1gK-V3W5F24tov_517&export=download",
-                "sentiments": "https://drive.google.com/uc?id=1GiY1AOp41dLXIIkgES4422AuDwmbUseL&export=download",
             },
             "test": {
                 "sentences": "https://drive.google.com/uc?id=1aNMOeZZbNwSRkjyCWAGtNCMa3YrshR-n&export=download",
@@ -544,7 +582,7 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(row['text'])
@@ -571,13 +609,18 @@ class MLHSD_TD_ID_Scenario(Scenario):
         Bersih: Tidak ada ujaran kebencian.
         Kasar: Ada ujaran kebencian dan kata-kata kasar, namun tidak menyerang pihak tertentu.
         Benci: Ada ujaran kebencian langsung atau serangan terhadap pihak tertentu.
-        Berdasarkan definisi labelnya, klasifikasikan kalimat berikut ini:
+        Berdasarkan definisi labelnya, klasifikasikan kalimat berikut ini dengan satu kata saja:
+        - Bersih
+        - Kasar
+        - Benci
+
         Kalimat: <text>
-        Jawab dengan hanya A, B atau C.
-        A: Bersih
-        B: Kasar
-        C: Benci
-        Jawaban: 
+        Jawaban: <answer>
+        
+        ...
+
+        Kalimat: <text>
+        Jawaban:
 
     Target completion:
         <answer>
@@ -602,12 +645,6 @@ class MLHSD_TD_ID_Scenario(Scenario):
             'test': TEST_SPLIT
         }
 
-        self.id2label = {
-            'Bersih': 'A',
-            'Kasar': 'B',
-            'Benci': 'C',
-        }
-
     def download_dataset(self, output_path: str):
         URL = "https://raw.githubusercontent.com/okkyibrohim/id-multi-label-hate-speech-and-abusive-language-detection/master/re_dataset.csv"
         target_path_file = os.path.join(output_path, "mlhsd")
@@ -624,16 +661,16 @@ class MLHSD_TD_ID_Scenario(Scenario):
     
     def get_label(self, row) -> str:
         if int(row["HS"]) == 1:
-            return "C"
+            return "Benci"
         elif int(row["Abusive"]) == 1:
-            return "B"
+            return "Kasar"
         else:
-            return "A"
+            return "Bersih"
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(row["Tweet"].strip())
@@ -656,6 +693,12 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
     The models are prompted using the following format:
 
         คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ ข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล คุณควรคำนึงถึงการประชดประชันด้วย เมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ
+
+        ข้อความ: <text>
+        คำตอบ: <toxicity>
+
+        ...
+
         ข้อความ: <text>
         คำตอบ: 
 
@@ -699,7 +742,7 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
         }
         
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(row["tweet_text"].strip())
@@ -725,13 +768,19 @@ class ViHSD_TD_VI_Scenario(Scenario):
         Sạch: Không quấy rối.
         Công kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào.
         Thù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể.
-        Với các định nghĩa của nhãn, hãy phân loại câu dưới đây:
-        Câu: <text>
-        Chỉ trả lời bằng A, B hoặc C.
-        A: Sạch
-        B: Công kích
-        C: Thù ghét
-        Câu trả lời: 
+        Với các định nghĩa của nhãn, hãy phân loại câu dưới đây với một từ duy nhất:
+        - Sạch
+        - Công kích
+        - Thù ghét
+
+
+        Câu văn: <text>
+        Câu trả lời: <toxicity>
+
+        ...
+        
+        Câu văn: <text>
+        Câu trả lời:
 
     Target completion:
         <toxicity>
@@ -754,7 +803,6 @@ class ViHSD_TD_VI_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'dev': VALID_SPLIT,
             'test': TEST_SPLIT
         }
         self.id2label = {
@@ -779,7 +827,7 @@ class ViHSD_TD_VI_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
                 input = Input(str(row["free_text"]).strip())
@@ -803,7 +851,13 @@ class Flores_MT_Scenario(Scenario):
 
     The models are prompted using the following general format:
 
-        Translate the following text into XX language.
+        Translate the following text into <language> language.
+
+        Text: <text>
+        Translation: <translation>
+
+        ...
+
         Text: <text>
         Translation:
 
@@ -870,8 +924,14 @@ class XLSum_AS_Scenario(Scenario):
 
     The models are prompted using the following general format:
 
-        Article: <text>
         Summarize this <language> language article in 1 or 2 sentences. The answer must be written in <language> language.
+
+        Article: <text>
+        Summary: <summary>
+
+        ...
+
+        Article: <text>
         Summary:
 
     Target completion:
@@ -958,14 +1018,25 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
 
     The models are prompted using the following format:
 
-        பின் வரும் வாக் கியத் தில்
-         ெவளிப் படுத் தப் படும்
-        உணர் வு எது? <sentence>
-        ஒரு ெசால் லில் மட் டும் பதிலளிக் கவும் :
-         ேநர்மைற/எதிர் மைற
+        உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.
+        பின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.
+        A: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.
+        B: X உம் Y உம் முரண்படுகின்றன.
+        C: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.
+        A அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.
+
+        X: <premise>
+        Y: <hypothesis>
+        பதில்: <entailment>
+
+        ...
+
+        X: <premise>
+        Y: <hypothesis>
+        பதில்: 
 
     Target completion:
-        <answer>
+        <entailment>
 
     @misc{https://doi.org/10.48550/arxiv.2204.08776,
         doi = {10.48550/ARXIV.2204.08776},
@@ -987,7 +1058,6 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         super().__init__()
         self.splits = {
             'train': TRAIN_SPLIT,
-            'validation': VALID_SPLIT,
             'test': TEST_SPLIT,
         }
         self.id2label = {
@@ -1000,7 +1070,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         dataset = datasets.load_dataset("Divyanshu/indicxnli", "ta")
 
         outputs = []
-        for split in self.splits:
+        for split in self.splits.keys():
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
             for index, row in data.iterrows():
@@ -1027,17 +1097,24 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
     The models are prompted using the following format:
 
         Anda akan diberikan dua kalimat, X dan Y.
-        X: <sentence1>
-        Y: <sentence2>
         Tentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.
         A: Kalau X benar, maka Y juga harus benar.
         B: X bertentangan dengan Y.
         C: Ketika X benar, Y mungkin benar atau mungkin tidak benar.
         Jawablah hanya dengan menggunakan satu huruf A, B atau C.
+
+        X: <sentence1>
+        Y: <sentence2>
+        Jawaban: <entailment>
+
+        ...
+
+        X: <sentence1>
+        Y: <sentence2>
         Jawaban: 
 
     Target completion:
-        <answer>
+        <entailment>
 
     @inproceedings{mahendra-etal-2021-indonli,
         title = "{I}ndo{NLI}: A Natural Language Inference Dataset for {I}ndonesian",
@@ -1087,7 +1164,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
             for index, row in data.iterrows():
@@ -1114,17 +1191,24 @@ class XNLI_NLI_Scenario(Scenario):
     The models are prompted using the following general format:
 
         You will be given two sentences, X and Y.
-        X: {sentence1}
-        Y: {sentence2}
         Determine which of the following statements applies to sentences X and Y the best.
         A: If X is true, Y must be true.
         B: X contradicts Y.
         C: When X is true, Y may or may not be true.
         Answer strictly with a single letter A, B or C.
+
+        X: <sentence1>
+        Y: <sentence2>
+        Answer: <entailment>
+
+        ...
+
+        X: <sentence1>
+        Y: <sentence2>
         Answer:
 
     Target completion:
-        <answer>
+        <entailment>
 
     @InProceedings{conneau2018xnli,
         author = {Conneau, Alexis
@@ -1151,8 +1235,7 @@ class XNLI_NLI_Scenario(Scenario):
         super().__init__()
         self.language = language
         self.splits = {
-            'train': TRAIN_SPLIT,
-            'validation': VALID_SPLIT,
+            'validation': TRAIN_SPLIT,
             'test': TEST_SPLIT,
         }
         self.id2label = {
@@ -1163,9 +1246,8 @@ class XNLI_NLI_Scenario(Scenario):
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("xnli", self.language)
-
         outputs = []
-        for split in list(dataset.keys()):
+        for split in self.splits.keys():
             df = dataset[split].to_pandas()
             data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
             for index, row in data.iterrows():
@@ -1189,11 +1271,19 @@ class XCOPA_CR_Scenario(Scenario):
 
     The models are prompted using the following general format:
 
-        Situation: {premise}
-        Based on the situation above, which of the following choices is most likely to be its {question}?
-        A: {choice1}
-        B: {choice2}
+        Based on the following situation, which of the following choices is most likely to be its {question}?
         Answer with only A or B.
+
+        Situation: <premise>
+        A: <choice1>
+        B: <choice2>
+        Answer: <answer>
+
+        ...
+
+        Situation: <premise>
+        A: <choice1>
+        B: <choice2>
         Answer:
 
     Target completion:
@@ -1240,8 +1330,8 @@ class XCOPA_CR_Scenario(Scenario):
                 "instruction2": "Tanggapi dengan hanya menggunakan A atau B.",
             },
             "ta": {
-                "cause": "สาเหตุ",
-                "effect": "ผล",
+                "cause": "காரணமாக",
+                "effect": "விளைவாக",
                 "instruction1": "பின்வரும் வாக்கியங்களில் பெரும்பாலும் எது தரப்பட்ட சூழ்நிலைக்குரிய {} இருக்கும்?",
                 "instruction2": "A அல்லது B எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             },
@@ -1270,7 +1360,7 @@ class XCOPA_CR_Scenario(Scenario):
             data = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
             for index, row in data.iterrows():
                 instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
-                passage = "{premise}\n{instruction1}\nA: {choice1}\nB:{choice2}\n{instruction2}".format(
+                passage = "{premise}\n{instruction1}\nA: {choice1}\nB: {choice2}\n{instruction2}".format(
                     premise=row["premise"].strip(),
                     instruction1=instruction1,
                     choice1=row["choice1"].strip(),
