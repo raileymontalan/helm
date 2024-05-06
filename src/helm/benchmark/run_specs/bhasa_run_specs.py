@@ -473,22 +473,22 @@ def get_flores_mt_vi_en_spec(zeroshot=False) -> RunSpec:
 
 xlsum_prompts = {
     "id": {
-        "instruction": "Rangkumkan artikel Bahasa Indonesia berikut ini dalam 1 atau 2 kalimat. Jawabannya harus ditulis dalam Bahasa Indonesia.",
+        "instructions": "Rangkumkan artikel Bahasa Indonesia berikut ini dalam 1 atau 2 kalimat. Jawabannya harus ditulis dalam Bahasa Indonesia.",
         "input_noun": "Artikel",
         "output_noun": "Rangkuman",
     },
     "ta": {
-        "instruction": "இந்தத் தமிழ்க் கட்டுரைக்கு 1 அல்லது 2 வாக்கியங்களில் பொழிப்பு எழுதவும். பதில் தமிழ் மொழியில் இருக்கவேண்டும்.",
+        "instructions": "இந்தத் தமிழ்க் கட்டுரைக்கு 1 அல்லது 2 வாக்கியங்களில் பொழிப்பு எழுதவும். பதில் தமிழ் மொழியில் இருக்கவேண்டும்.",
         "input_noun": "கட்டுரை",
         "output_noun": "கட்டுரைப் பொழிப்பு",
     },
     "th": {
-        "instruction": "กรุณาสรุปบทความภาษาไทยฉบับนี้ใน 1 หรือ 2 ประโยค คำตอบควรเป็นภาษาไทย",
+        "instructions": "กรุณาสรุปบทความภาษาไทยฉบับนี้ใน 1 หรือ 2 ประโยค คำตอบควรเป็นภาษาไทย",
         "input_noun": "บทความ",
         "output_noun": "บทสรุป",
     },
     "vi": {
-        "instruction": "Tóm tắt bài báo Tiếng Việt trên với 1 hay 2 câu. Câu trả lời nên được viết bằng tiếng Việt.",
+        "instructions": "Tóm tắt bài báo Tiếng Việt trên với 1 hay 2 câu. Câu trả lời nên được viết bằng tiếng Việt.",
         "input_noun": "Bài báo",
         "output_noun": "Bản tóm tắt",
     }
