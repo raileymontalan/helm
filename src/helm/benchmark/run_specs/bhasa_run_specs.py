@@ -62,8 +62,9 @@ def get_indicqa_qa_ta_spec(zeroshot=False) -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="உங்களுக்கு ஒரு பத்தியும் ஒரு கேள்வியும் தரப்படும். தரப்பட்ட பத்தியிலிருந்து கேள்விக்கான பதிலைக் கண்டறியவும்.",
         output_noun="பதில்",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=100,
+        max_tokens=128,
     )
 
     scenario_spec = ScenarioSpec(
@@ -92,8 +93,9 @@ def get_tydiqa_goldp_qa_id_spec(zeroshot=False) -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="Anda akan diberikan sebuah paragraf dan sebuah pertanyaan. Jawablah pertanyaannya dengan mengekstrak jawaban dari paragraf tersebut.",
         output_noun="Jawaban",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=100,
+        max_tokens=128,
     )
 
     scenario_spec = ScenarioSpec(
@@ -132,8 +134,9 @@ def generate_xquad_run_spec(zeroshot=False, language="th"):
     adapter_spec = get_generation_adapter_spec(
         instructions=xquad_prompts[language]['instructions'],
         output_noun=xquad_prompts[language]['output_noun'],
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=100,
+        max_tokens=128,
     )
 
     scenario_spec = ScenarioSpec(
@@ -174,8 +177,9 @@ def get_indicsentiment_sa_ta_spec(zeroshot=False) -> RunSpec:
         instructions="பின்வரும் வாக்கியத்தில் வெளிப்படுத்தப்படும் உணர்வு எது?\nஒரு சொல்லில் மட்டும் பதிலளிக்கவும்:\n- நேர்மறை\n- எதிர்மறை",
         input_noun="வாக்கியம்",
         output_noun="பதில்",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -186,7 +190,7 @@ def get_indicsentiment_sa_ta_spec(zeroshot=False) -> RunSpec:
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_classification_metric_specs(),
+        metric_specs=get_classification_metric_specs() + get_basic_metric_specs([]),
         groups=["bhasa_nlu"],
     )
 
@@ -203,8 +207,9 @@ def get_nusax_sa_id_spec(zeroshot=False) -> RunSpec:
         instructions="Apa sentimen dari kalimat berikut ini?\nJawablah dengan satu kata saja:\n- Positif\n- Negatif\n- Netral",
         input_noun="Kalimat",
         output_noun="Jawaban",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -232,8 +237,9 @@ def get_wisesight_sa_th_spec(zeroshot=False) -> RunSpec:
         instructions="อารมณ์ความรู้สึกของข้อความต่อไปนี้เป็นอย่างไร?\nโปรดตอบโดยใช้คำเดียวเท่านั้น:\n- แง่บวก\n- แง่ลบ\n- เฉยๆ",
         input_noun="ข้อความ",
         output_noun="คำตอบ",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -261,8 +267,9 @@ def get_uit_vsfc_sa_vi_spec(zeroshot=False) -> RunSpec:
         instructions="Sắc thái của câu sau đây là gì?\nTrả lời với một từ duy nhất:\n- Tích cực\n- Tiêu cực\n- Trung lập",
         input_noun="Câu văn",
         output_noun="Câu trả lời",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -290,8 +297,9 @@ def get_mlhsd_td_id_spec(zeroshot=False) -> RunSpec:
         instructions="Anda adalah pendeteksi ujaran kebencian. Definisi dari labelnya adalah sebagai berikut:\nBersih: Tidak ada ujaran kebencian.\nKasar: Ada ujaran kebencian dan kata-kata kasar, namun tidak menyerang pihak tertentu.\nBenci: Ada ujaran kebencian langsung atau serangan terhadap pihak tertentu.\nBerdasarkan definisi labelnya, klasifikasikan kalimat berikut ini dengan satu kata saja:\n- Bersih\n- Kasar\n- Benci",
         input_noun="Kalimat",
         output_noun="Jawaban",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -319,8 +327,9 @@ def get_thai_toxicity_tweets_td_th_spec(zeroshot=False) -> RunSpec:
         instructions="คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ ข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล คุณควรคำนึงถึงการประชดประชันด้วย เมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ",
         input_noun="ข้อความ",
         output_noun="คำตอบ",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -348,8 +357,9 @@ def get_vihsd_td_vi_spec(zeroshot=False) -> RunSpec:
         instructions="Bạn là máy phát hiện phát ngôn thù ghét. Các nhãn được định nghĩa như sau:\nSạch: Không quấy rối.\nCông kích: Bao gồm quấy rối và thậm chí chửi thề, nhưng không tấn công bất kì đối tượng cụ thể nào.\nThù ghét: Trực tiếp quấy rối hay lăng mạ một đối tượng cụ thể.\nVới các định nghĩa của nhãn, hãy phân loại câu dưới đây với một từ duy nhất:\n- Sạch\n- Công kích\n- Thù ghét",
         input_noun="Câu văn",
         output_noun="Câu trả lời",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -420,7 +430,8 @@ def generate_flores_run_spec(zeroshot=False, pair="en_id"):
         instructions=flores_prompts[pair]['instructions'],
         input_noun=flores_prompts[pair]['input_noun'],
         output_noun=flores_prompts[pair]['output_noun'],
-        max_tokens=100,
+        stop_sequences=["<|endoftext|>", "\n"],
+        max_tokens=128,
         max_train_instances=max_train_instances,
     )
 
@@ -506,9 +517,10 @@ def generate_xlsum_run_spec(zeroshot=False, language="id", device="gpu"):
         instructions=xlsum_prompts[language]['instructions'],
         input_noun=xlsum_prompts[language]['input_noun'],
         output_noun=xlsum_prompts[language]['output_noun'],
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        temperature = 0.3,
-        max_tokens=100,
+        max_tokens=128,
+        temperature=0.3,
     )
 
     scenario_spec = ScenarioSpec(
@@ -558,8 +570,9 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.\nபின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
         output_noun="பதில்",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -586,8 +599,9 @@ def get_indonli_nli_id_spec(zeroshot=False) -> RunSpec:
     adapter_spec = get_generation_adapter_spec(
         instructions="Anda akan diberikan dua kalimat, X dan Y.\nTentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah hanya dengan menggunakan satu huruf A, B atau C.",
         output_noun="Jawaban",
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -626,8 +640,9 @@ def generate_xnli_run_spec(zeroshot=False, language="vi"):
     adapter_spec = get_generation_adapter_spec(
         instructions=xnli_prompts[language]['instructions'] + '\n' + xnli_prompts[language]['input_suffix'],
         output_noun=xnli_prompts[language]['output_noun'],
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -641,7 +656,7 @@ def generate_xnli_run_spec(zeroshot=False, language="vi"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_classification_metric_specs(),
+        metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlr"],
     )
 
@@ -683,8 +698,9 @@ def generate_xcopa_run_spec(zeroshot=False, language="id"):
     adapter_spec = get_generation_adapter_spec(
         input_noun=xcopa_prompts[language]['input_noun'],
         output_noun=xcopa_prompts[language]['output_noun'],
+        stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
-        max_tokens=25,
+        max_tokens=8,
     )
 
     scenario_spec = ScenarioSpec(
@@ -698,7 +714,7 @@ def generate_xcopa_run_spec(zeroshot=False, language="id"):
         name=name,
         scenario_spec=scenario_spec,
         adapter_spec=adapter_spec,
-        metric_specs=get_classification_metric_specs(),
+        metric_specs=get_f1_metric_specs(),
         groups=["bhasa_nlr"],
     )
 
@@ -740,6 +756,7 @@ def get_xcopa_cr_vi_spec(zeroshot=False) -> RunSpec:
 #         instructions=lindsea_mp_prompts[language]['instructions'],
 #         input_suffix=lindsea_mp_prompts[language]['input_suffix'],
 #         output_noun=lindsea_mp_prompts[language]['output_noun'],
+        # stop_sequences=["<|endoftext|>", "\n"],
 #         max_train_instances=max_train_instances,
 #         max_tokens=1,
 #     )
@@ -781,6 +798,7 @@ def get_xcopa_cr_vi_spec(zeroshot=False) -> RunSpec:
 #     adapter_spec = get_bhasa_adapter_spec(
 #         instructions=lindsea_pr_prompts[language]['instructions'],
 #         output_noun=lindsea_pr_prompts[language]['output_noun'],
+        # stop_sequences=["<|endoftext|>", "\n"],
 #         max_train_instances=max_train_instances,
 #         max_tokens=1,
 #     )
