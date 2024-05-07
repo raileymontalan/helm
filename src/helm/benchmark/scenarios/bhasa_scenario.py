@@ -825,9 +825,9 @@ class ViHSD_TD_VI_Scenario(Scenario):
             'test': TEST_SPLIT
         }
         self.id2label = {
-            0: 'A',
-            1: 'B',
-            2: 'C',
+            0: 'Sạch',
+            1: 'Công kích',
+            2: 'Thù ghét',
         }
 
     def download_dataset(self, output_path: str):
@@ -1171,40 +1171,38 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
             'test': TEST_SPLIT,
         }
         self.id2label = {
-            0: 'A',
-            1: 'B',
-            2: 'C'
+            'e': 'A',
+            'c': 'B',
+            'n': 'C'
         }
 
     def download_dataset(self, output_path: str):
         URLS = {
-            'train': "https://github.com/ir-nlp-csui/indonli/blob/main/data/indonli/train.jsonl",
-            'test': "https://github.com/ir-nlp-csui/indonli/blob/main/data/indonli/test_lay.jsonl"
+            'train': "https://raw.githubusercontent.com/ir-nlp-csui/indonli/main/data/indonli/train.jsonl",
+            'test': "https://raw.githubusercontent.com/ir-nlp-csui/indonli/main/data/indonli/test_lay.jsonl"
         }
 
         dataset = {}
-        for split in list(URLS.keys()):
+        for split in self.splits.keys():
             dataset[split] = []
             target_path_file = os.path.join(output_path, split)
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
             df = pd.read_json(target_path_file, lines=True)
-            df = df[df["category"] != "q"]
-            dataset[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
+            if split == 'train':
+                dataset[split] = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
+            else:
+                dataset[split] = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
         return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
         dataset = self.download_dataset(output_path)
         outputs = []
         for split in self.splits.keys():
-            df = dataset[split].to_pandas()
-            if split == 'train':
-                data = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
-            else:
-                data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
+            data = dataset[split]
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
-                output = Output(self.id2label[int(row["label"])])
+                output = Output(self.id2label[row["label"]])
                 references = [
                     Reference(output, tags=[CORRECT_TAG]),
                 ]
