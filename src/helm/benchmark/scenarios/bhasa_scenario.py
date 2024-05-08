@@ -1106,6 +1106,8 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
                 data = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
             else:
                 data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+                diff = df[~df.apply(tuple,1).isin(data.apply(tuple,1))]
+                data = pd.concat([data, diff[diff["label"]==2].iloc[0].to_frame().transpose()], axis=0, ignore_index=True)
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
@@ -1287,6 +1289,8 @@ class XNLI_NLI_Scenario(Scenario):
                 data = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
             else:
                 data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
+                diff = df[~df.apply(tuple,1).isin(data.apply(tuple,1))]
+                data = pd.concat([data, diff[diff["label"]==1].iloc[0].to_frame().transpose()], axis=0, ignore_index=True)
             for index, row in data.iterrows():
                 passage = "X: " + row["premise"].strip() + "\nY: " + row["hypothesis"].strip()
                 input = Input(passage)
