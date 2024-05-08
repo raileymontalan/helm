@@ -429,7 +429,7 @@ class Wisesight_SA_TH_Scenario(Scenario):
     The models are prompted using the following format:
 
         อารมณ์ความรู้สึกของข้อความต่อไปนี้เป็นอย่างไร?
-        โปรดตอบโดยใช้คำเดียวเท่านั้น:
+        กรุณาตอบโดยใช้คำเดียวเท่านั้น:
         - แง่บวก
         - แง่ลบ
         - เฉยๆ
@@ -710,7 +710,9 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
 
     The models are prompted using the following format:
 
-        คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ ข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล คุณควรคำนึงถึงการประชดประชันด้วย เมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ
+        คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ 
+        ข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล และคุณควรคำนึงถึงการประชดประชันด้วย 
+        เมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ
 
         ข้อความ: <text>
         คำตอบ: <toxicity>
@@ -1051,7 +1053,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         A: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.
         B: X உம் Y உம் முரண்படுகின்றன.
         C: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.
-        A அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.
+        A அல்லது B அல்லது C என்ற ஒறே எழுத்தில் மட்டும் பதிலளிக்கவும்.
 
         X: <premise>
         Y: <hypothesis>
@@ -1132,7 +1134,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
         A: Kalau X benar, maka Y juga harus benar.
         B: X bertentangan dengan Y.
         C: Ketika X benar, Y mungkin benar atau mungkin tidak benar.
-        Jawablah hanya dengan menggunakan satu huruf A, B atau C.
+        Jawablah dengan satu huruf A, B atau C saja.
 
         X: <sentence1>
         Y: <sentence2>
@@ -1362,25 +1364,25 @@ class XCOPA_CR_Scenario(Scenario):
                 "cause": "sebab",
                 "effect": "akibat",
                 "instruction1": "Berdasarkan situasi di atas, mana dari pilihan-pilihan berikut ini yang lebih mungkin menjadi {}?",
-                "instruction2": "Tanggapi dengan hanya menggunakan A atau B.",
+                "instruction2": "Jawablah dengan satu huruf A atau B saja.",
             },
             "ta": {
                 "cause": "காரணமாக",
                 "effect": "விளைவாக",
                 "instruction1": "பின்வரும் வாக்கியங்களில் பெரும்பாலும் எது தரப்பட்ட சூழ்நிலைக்குரிய {} இருக்கும்?",
-                "instruction2": "A அல்லது B எழுத்தில் மட்டும் பதிலளிக்கவும்.",
+                "instruction2": "A அல்லது B என்ற ஒறே எழுத்தில் மட்டும் பதிலளிக்கவும்.",
             },
             "th": {
                 "cause": "สาเหตุ",
                 "effect": "ผล",
                 "instruction1": "เมื่อพิจารณาจากสถานการณ์นี้ ตัวเลือกใดต่อไปนี้น่าจะเป็น{}มากกว่ากัน?",
-                "instruction2": "กรุณาตอบด้วยตัวอักษร A หรือ B เท่านั้น",
+                "instruction2": "กรุณาตอบด้วยตัวอักษร A หรือ B ตัวเดียวเท่านั้น",
             },
             "vi": {
                 "cause": "nguyên nhân",
                 "effect": "kết quả",
                 "instruction1": "Với tình huống trên, lựa chọn nào dưới đây có khả năng cao là {} của nó hơn?",
-                "instruction2": "Chỉ trả lời bằng chữ cái A hoặc B.",
+                "instruction2": "Trả lời với một chữ cái duy nhất A hoặc B.",
             },
         }
 

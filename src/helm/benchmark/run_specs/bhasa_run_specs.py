@@ -234,7 +234,7 @@ def get_wisesight_sa_th_spec(zeroshot=False) -> RunSpec:
         max_train_instances = 0
 
     adapter_spec = get_generation_adapter_spec(
-        instructions="อารมณ์ความรู้สึกของข้อความต่อไปนี้เป็นอย่างไร?\nโปรดตอบโดยใช้คำเดียวเท่านั้น:\n- แง่บวก\n- แง่ลบ\n- เฉยๆ",
+        instructions="อารมณ์ความรู้สึกของข้อความต่อไปนี้เป็นอย่างไร?\nกรุณาตอบโดยใช้คำเดียวเท่านั้น:\n- แง่บวก\n- แง่ลบ\n- เฉยๆ",
         input_noun="ข้อความ",
         output_noun="คำตอบ",
         stop_sequences=["<|endoftext|>", "\n"],
@@ -324,7 +324,7 @@ def get_thai_toxicity_tweets_td_th_spec(zeroshot=False) -> RunSpec:
         max_train_instances = 0
     
     adapter_spec = get_generation_adapter_spec(
-        instructions="คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ ข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล คุณควรคำนึงถึงการประชดประชันด้วย เมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ",
+        instructions="คุณเป็นเครื่องตรวจจับข้อความที่เป็นพิษ\nข้อความเป็นพิษถ้ามันทำร้าย สร้างความเสียหาย หรือสื่อเจตนาเชิงลบถึงบุคคลหรือกลุ่มบุคคล และคุณควรคำนึงถึงการประชดประชันด้วย\nเมื่อได้รับข้อความ ให้ตอบด้วยตัวอักษร Y หากเป็นพิษ และ N หากไม่เป็นพิษ",
         input_noun="ข้อความ",
         output_noun="คำตอบ",
         stop_sequences=["<|endoftext|>", "\n"],
@@ -489,17 +489,17 @@ xlsum_prompts = {
         "output_noun": "Rangkuman",
     },
     "ta": {
-        "instructions": "இந்தத் தமிழ்க் கட்டுரைக்கு 1 அல்லது 2 வாக்கியங்களில் பொழிப்பு எழுதவும். பதில் தமிழ் மொழியில் இருக்கவேண்டும்.",
+        "instructions": "பின்வரும் தமிழ்க் கட்டுரைக்கு 1 அல்லது 2 வாக்கியங்களில் பொழிப்பு எழுதவும். பதில் தமிழ் மொழியில் இருக்கவேண்டும்.",
         "input_noun": "கட்டுரை",
         "output_noun": "கட்டுரைப் பொழிப்பு",
     },
     "th": {
-        "instructions": "กรุณาสรุปบทความภาษาไทยฉบับนี้ใน 1 หรือ 2 ประโยค คำตอบควรเป็นภาษาไทย",
+        "instructions": "กรุณาสรุปบทความภาษาไทยต่อไปนี้ใน 1 หรือ 2 ประโยค คำตอบควรเป็นภาษาไทย",
         "input_noun": "บทความ",
         "output_noun": "บทสรุป",
     },
     "vi": {
-        "instructions": "Tóm tắt bài báo Tiếng Việt trên với 1 hay 2 câu. Câu trả lời nên được viết bằng tiếng Việt.",
+        "instructions": "Tóm tắt bài báo Tiếng Việt dưới đây với 1 hay 2 câu. Câu trả lời nên được viết bằng tiếng Việt.",
         "input_noun": "Bài báo",
         "output_noun": "Bản tóm tắt",
     }
@@ -568,7 +568,7 @@ def get_indicxnli_nli_ta_spe(zeroshot=False) -> RunSpec:
         max_train_instances = 0
 
     adapter_spec = get_generation_adapter_spec(
-        instructions="உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.\nபின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C எழுத்தில் மட்டும் பதிலளிக்கவும்.",
+        instructions="உங்களுக்கு இரண்டு வாக்கியங்கள், X மற்றும் Y, தரப்படும்.\nபின்வரும் கூற்றுகளில் எது X மற்றும் Y வாக்கியங்களுடன் மிகப் பொருந்துகிறது எனக் கண்டறியவும்.\nA: X உண்மை என்றால் Y உம் உண்மையாக இருக்க வேண்டும்.\nB: X உம் Y உம் முரண்படுகின்றன.\nC: X உண்மையாக இருக்கும்போது Y உண்மையாக இருக்கலாம் அல்லது இல்லாமல் இருக்கலாம்.\nA அல்லது B அல்லது C என்ற ஒறே எழுத்தில் மட்டும் பதிலளிக்கவும்.",
         output_noun="பதில்",
         stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
@@ -597,7 +597,7 @@ def get_indonli_nli_id_spec(zeroshot=False) -> RunSpec:
         max_train_instances = 0
 
     adapter_spec = get_generation_adapter_spec(
-        instructions="Anda akan diberikan dua kalimat, X dan Y.\nTentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah hanya dengan menggunakan satu huruf A, B atau C.",
+        instructions="Anda akan diberikan dua kalimat, X dan Y.\nTentukan mana dari pernyataan berikut ini yang paling sesuai untuk kalimat X dan Y.\nA: Kalau X benar, maka Y juga harus benar.\nB: X bertentangan dengan Y.\nC: Ketika X benar, Y mungkin benar atau mungkin tidak benar.\nJawablah dengan satu huruf A, B atau C saja.",
         output_noun="Jawaban",
         stop_sequences=["<|endoftext|>", "\n"],
         max_train_instances=max_train_instances,
