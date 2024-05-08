@@ -7,6 +7,7 @@ from helm.benchmark.adaptation.common_adapter_specs import (
 from helm.benchmark.adaptation.adapter_spec import (
     ADAPT_GENERATION,
     ADAPT_MULTIPLE_CHOICE_JOINT,
+    ADAPT_MULTIPLE_CHOICE_SEPARATE_ORIGINAL,
     AdapterSpec,
 )
 
@@ -77,6 +78,7 @@ def get_bhasa_adapter_spec(
     )
 
 def get_bhasa_multiple_choice_joint_adapter_spec(
+    method: str = ADAPT_MULTIPLE_CHOICE_SEPARATE_ORIGINAL,
     instructions: str = "",
     input_noun: Optional[str] = None,
     newline_after_input_noun: bool = False,
@@ -106,7 +108,7 @@ def get_bhasa_multiple_choice_joint_adapter_spec(
     """
 
     return AdapterSpec(
-        method=ADAPT_MULTIPLE_CHOICE_JOINT,
+        method=method,
         instructions=format_instructions(instructions),
         input_prefix=input_prefix if input_prefix else format_prefix(input_noun, append_new_line=newline_after_input_noun),
         input_suffix=format_suffix(input_suffix),

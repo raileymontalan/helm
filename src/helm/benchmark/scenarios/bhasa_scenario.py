@@ -1421,90 +1421,91 @@ class XCOPA_CR_Scenario(Scenario):
     
 # LD
     
-# class LINDSEA_MP_Scenario(Scenario):
-#     """
-#     This is a LINDSEA minimal pairs (linguistic diagnostic for syntax) scenario. The data comes from the BHASA LINDSEA dataset.
+class LINDSEA_MP_Scenario(Scenario):
+    """
+    This is a LINDSEA minimal pairs (linguistic diagnostic for syntax) scenario. The data comes from the BHASA LINDSEA dataset.
 
-#     The models are prompted using the following general format:
+    The models are prompted using the following general format:
 
-#         System Prompt:
-#         You are a <language> linguist
-#         Human Prompt:
-#         Which sentence is more acceptable?
-#         A: <sentence1>
-#         B: <sentence2>
-#         Answer with A or B only.
+        Which sentence is more acceptable?
+        Answer with A or B only.
+        A: <sentence1>
 
-#     Target completion:
-#         <choice>
-
-#     @misc{leong2023bhasa,
-#         title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
-#         author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
-#         year={2023},
-#         eprint={2309.06085},
-#         archivePrefix={arXiv},
-#         primaryClass={cs.CL}
-#     }
-#     """
-
-#     name = "lindsea_mp"
-#     description = "LINDSEA minimal pairs dataset"
-#     tags = ["minimal_pairs", "linguistic_diagnostic", "syntax"]
-
-#     def __init__(self, language: str):
-#         super().__init__()
-#         self.language = language
-#         self.splits = {
-#             'train': TRAIN_SPLIT,
-#             'test': TEST_SPLIT
-#         }
-#         self.prompt = {
-#             "id": {
-#                 "question": "Kalimat mana yang lebih mungkin?",
-#             },
-#         }
-
-#     def download_dataset(self, output_path: str):
-#         URLS = {
-#             "npis_and_negation": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/NPIs_and_negation.jsonl",
-#             "argument_structure": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/argument_structure.jsonl",
-#             "filler_gap_dependencies": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/filler-gap_dependencies.jsonl",
-#             "morphology": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/morphology.jsonl",
-#         }
+        Which sentence is more acceptable?
+        Answer with A or B only.
+        B: <sentence2>
         
-#         data_files = {}
-#         for file in list(URLS.keys()):
-#             data_files[file] = []
-#             target_path_file = os.path.join(output_path, file)
-#             ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
-#             data_files[file] = pd.read_json(target_path_file, lines=True)
-#         dataset = pd.concat(data_files)
+
+    Target completion:
+        <choice>
+
+    @misc{leong2023bhasa,
+        title={BHASA: A Holistic Southeast Asian Linguistic and Cultural Evaluation Suite for Large Language Models}, 
+        author={Wei Qi Leong and Jian Gang Ngui and Yosephine Susanto and Hamsawardhini Rengarajan and Kengatharaiyer Sarveswaran and William Chandra Tjhi},
+        year={2023},
+        eprint={2309.06085},
+        archivePrefix={arXiv},
+        primaryClass={cs.CL}
+    }
+    """
+
+    name = "lindsea_mp"
+    description = "LINDSEA minimal pairs dataset"
+    tags = ["minimal_pairs", "linguistic_diagnostic", "syntax"]
+
+    def __init__(self, language: str):
+        super().__init__()
+        self.language = language
+        self.splits = {
+            'train': TRAIN_SPLIT,
+            'test': TEST_SPLIT
+        }
+        self.prompt = {
+            "id": {
+                "question": "Kalimat mana yang lebih mungkin?\nJawablah dengan menggunakan A atau B saja.",
+            },
+        }
+
+    def download_dataset(self, output_path: str):
+        URLS = {
+            "npis_and_negation": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/NPIs_and_negation.jsonl",
+            "argument_structure": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/argument_structure.jsonl",
+            "filler_gap_dependencies": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/filler-gap_dependencies.jsonl",
+            "morphology": f"https://raw.githubusercontent.com/aisingapore/BHASA/main/lindsea/{self.language}/syntax/morphology.jsonl",
+        }
         
-#         return dataset
+        data_files = {}
+        for file in list(URLS.keys()):
+            data_files[file] = []
+            target_path_file = os.path.join(output_path, file)
+            ensure_file_downloaded(source_url=URLS[file], target_path=target_path_file)
+            data_files[file] = pd.read_json(target_path_file, lines=True)
+        dataset = pd.concat(data_files)
+        
+        return dataset
 
 
-#     def get_instances(self, output_path) -> List[Instance]:
-#         data = self.download_dataset(output_path)
-#         dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
+    def get_instances(self, output_path) -> List[Instance]:
+        data = self.download_dataset(output_path)
+        dataset = datasets.Dataset.from_pandas(data).train_test_split(test_size=0.8)
         
-#         outputs = []
-#         for split in list(dataset.keys()):
-#             data = dataset[split].to_pandas()
-#             for index, row in data.iterrows():
-#                 input = Input(text=self.prompt[self.language]['question'])
-#                 references = [
-#                     Reference(Output(text=row["correct"].strip()), tags=[CORRECT_TAG]),
-#                     Reference(Output(text=row["wrong"].strip()), tags=[]),
-#                 ]
-#                 random.shuffle(references) # Shuffle order of references
-#                 instance = Instance(
-#                     input=input,
-#                     references=references, 
-#                     split=self.splits[split]
-#                 )
-#                 outputs.append(instance)
-#         return outputs
+        outputs = []
+        for split in list(dataset.keys()):
+            data = dataset[split].to_pandas()
+            for index, row in data.iterrows():
+                input = Input(text=self.prompt[self.language]['question'] + "\n\n")
+                references = [
+                    Reference(Output(text=row["correct"].strip()), tags=[CORRECT_TAG]),
+                    Reference(Output(text=row["wrong"].strip()), tags=[]),
+                ]
+                random.shuffle(references) # Shuffle order of references
+                instance = Instance(
+                    input=input,
+                    references=references, 
+                    split=self.splits[split]
+                )
+                outputs.append(instance)
+        return outputs
     
 # class LINDSEA_PR_Scenario(Scenario):
 #     """
