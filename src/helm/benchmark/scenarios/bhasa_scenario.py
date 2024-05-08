@@ -51,6 +51,7 @@ class IndicQA_QA_TA_Scenario(Scenario):
     def get_instances(self, output_path) -> List[Instance]:
         dataset = datasets.load_dataset("ai4bharat/IndicQA", "indicqa.ta")
         df = dataset['test'].to_pandas()
+        df = df[df["answers"].apply(lambda x: len(x["text"][0].strip()) > 0)]
         df_test = df.sample(n=100, random_state=7900)
         df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
         df_train = df_train[df_train["context"].apply(len) < df_train["context"].apply(len).quantile(.2)]
@@ -63,25 +64,24 @@ class IndicQA_QA_TA_Scenario(Scenario):
         for split in self.splits.keys():
             data = dataset[split]
             for index, row in data.iterrows():
-                if len(row["answers"]["text"][0].strip()) > 0:
-                    passage = row["context"].strip()
-                    question = row["question"].strip()
-                    input = PassageQuestionInput(
-                        passage=passage,
-                        question=question,
-                        passage_prefix="பத்தி: ",
-                        question_prefix="கேள்வி: ",
-                    )
-                    output = Output(text=row["answers"]["text"][0].strip())
-                    references = [
-                        Reference(output, tags=[CORRECT_TAG]),
-                    ]
-                    instance = Instance(
-                        input=input,
-                        references=references, 
-                        split=self.splits[split]
-                    )
-                    outputs.append(instance)
+                passage = row["context"].strip()
+                question = row["question"].strip()
+                input = PassageQuestionInput(
+                    passage=passage,
+                    question=question,
+                    passage_prefix="பத்தி: ",
+                    question_prefix="கேள்வி: ",
+                )
+                output = Output(text=row["answers"]["text"][0].strip())
+                references = [
+                    Reference(output, tags=[CORRECT_TAG]),
+                ]
+                instance = Instance(
+                    input=input,
+                    references=references, 
+                    split=self.splits[split]
+                )
+                outputs.append(instance)
         return outputs
 
 class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
