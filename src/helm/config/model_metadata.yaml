@@ -2344,3 +2344,13 @@ models:
     num_parameters: 100000000000
     release_date: 2022-06-23
     tags: [TEXT_MODEL_TAG, LIMITED_FUNCTIONALITY_TEXT_MODEL_TAG, ABLATION_MODEL_TAG]
+
+  # AI Singapore
+  - name: aisingapore/sea-lion-7b-instruct
+    display_name: SEA-LION 7B Instruct
+    description: SEA-LION 7B Instruct is a Large Language Model (LLM) for the Southeast Asia (SEA) region. It has been finetuned on thousands of English and Indonesian instruction-completion pairs alongside a smaller pool of instruction-completion pairs from other ASEAN languages. ([Link](https://huggingface.co/aisingapore/sea-lion-7b-instruct)).
+    creator_organization_name: AI Singapore
+    access: open
+    num_parameters: 7000000000
+    release_date: 2024-02-01
+    tags: [TEXT_MODEL_TAG, LIMITED_FUNCTIONALITY_TEXT_MODEL_TAG]
