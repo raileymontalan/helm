@@ -28,6 +28,7 @@ from helm.benchmark.model_metadata_registry import (
     NO_NEWLINES_TAG,
     OPENAI_CHATGPT_MODEL_TAG,
     MISTRAL_MODEL_TAG,
+    # AISG_SEALION_TAG,
     ModelMetadata,
     get_model_metadata,
 )
@@ -44,6 +45,7 @@ from helm.benchmark.run_expander import (
     OpenFlamingoRunExpander,
     OpenAIRunExpander,
     MistralRunExpander,
+    # AISGRunExpander,
     StopRunExpander,
 )
 from helm.benchmark.run_spec import RunSpec, get_run_spec_function
@@ -155,6 +157,10 @@ def construct_run_specs(spec: ObjectSpec) -> List[RunSpec]:
             and run_spec.adapter_spec.max_tokens == 1
         ):
             run_spec = singleton(IncreaseMaxTokensRunExpander(value=1).expand(run_spec))
+
+        # AI Singapore SEALION prompts
+        # if AISG_SEALION_TAG in model.tags:
+        #     run_spec = singleton(AISGRunExpander().expand(run_spec))
 
         # IDEFICS special handling
         if IDEFICS_MODEL_TAG in model.tags:

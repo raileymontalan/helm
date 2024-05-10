@@ -7,7 +7,7 @@ from helm.common.general import ensure_file_downloaded
 
 # NLU
 
-class IndicQA_QA_TA_Scenario(Scenario):
+class IndicQAScenario(Scenario):
     """
     This is a Tamil question answer scenario. The data comes from IndicQA, a manually curated cloze-style reading comprehension dataset.
 
@@ -37,7 +37,7 @@ class IndicQA_QA_TA_Scenario(Scenario):
     }
     """
 
-    name = "indicqa_qa_ta"
+    name = "indicqa"
     description = "IndicQA question answering dataset"
     tags = ["question_answering"]
 
@@ -84,7 +84,7 @@ class IndicQA_QA_TA_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
+class TyDiQAScenario(Scenario):
     """
     This is a Indonesian question answer scenario. The data comes from TyDIQA, a question answering dataset covering 
     11 typologically diverse languages with 204K question-answer pairs. 
@@ -131,7 +131,7 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
         }
     """
 
-    name = "tydiqa_goldp_qa_id"
+    name = "tydiqa"
     description = "TyDiQA GoldP question answering dataset"
     tags = ["question_answering"]
 
@@ -173,7 +173,7 @@ class TyDiQA_GoldP_QA_ID_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class XQuAD_QA_Scenario(Scenario):
+class XQuADScenario(Scenario):
     """
     This is a XQuAD question answer scenario. The data comes from XQuAD, and the dataset consists of a subset of
     240 paragraphs and 1190 question-answer pairs from the development set of SQuAD v1.1 together (Rajpurkar et al., 2016).
@@ -206,7 +206,7 @@ class XQuAD_QA_Scenario(Scenario):
     }
     """
 
-    name = "xquad_qa"
+    name = "xquad"
     description = "XQuAD question answering dataset"
     tags = ["question_answering"]
 
@@ -265,7 +265,7 @@ class XQuAD_QA_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
    
-class IndicSentiment_SA_TA_Scenario(Scenario):
+class IndicSentimentScenario(Scenario):
     """
     This is a Tamil sentiment analysis scenario. The data comes from IndicXTREME, and consists of product reviews
     that were written by annotators. Labels are positive or negative.
@@ -297,7 +297,7 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
     }
     """
 
-    name = "indicsentiment_sa_ta"
+    name = "indicsentiment"
     description = "IndicSentiment sentiment analysis dataset"
     tags = ["sentiment_analysis"]
 
@@ -318,8 +318,6 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
         outputs = []
         for split in self.splits.keys():
             data = dataset[split].to_pandas()
-            if split == 'train':
-                data = data[data["INDIC REVIEW"].apply(len) < data["INDIC REVIEW"].apply(len).quantile(.2)]
             data["LABEL"] = data["LABEL"].fillna("Positive")
             for index, row in data.iterrows():
                 input = Input(row["INDIC REVIEW"].strip())
@@ -335,7 +333,7 @@ class IndicSentiment_SA_TA_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
  
-class NusaX_SA_ID_Scenario(Scenario):
+class NusaXScenario(Scenario):
     """
     This is an Indonesian sentiment analysis scenario. The data consists of comments and reviews from the 
     IndoNLU benchmark. Labels are positive, negative or neutral.
@@ -369,7 +367,7 @@ class NusaX_SA_ID_Scenario(Scenario):
     }
     """
 
-    name = "nusax_sa_id"
+    name = "nusax"
     description = "NusaX-Senti sentiment analysis dataset"
     tags = ["sentiment_analysis"]
 
@@ -397,8 +395,6 @@ class NusaX_SA_ID_Scenario(Scenario):
             target_path_file = os.path.join(output_path, split)
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
             data = pd.read_csv(target_path_file)
-            if split == 'train':
-                data = data[data["text"].apply(len) < data["text"].apply(len).quantile(.2)]
             dataset[split] = data
         return dataset
 
@@ -421,7 +417,7 @@ class NusaX_SA_ID_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class Wisesight_SA_TH_Scenario(Scenario):
+class WisesightScenario(Scenario):
     """
     This is an Thai sentiment analysis scenario. The data consists of social media messages regarding
     consumer products and services. Labels are positive, negative or neutral.
@@ -460,7 +456,7 @@ class Wisesight_SA_TH_Scenario(Scenario):
     }
     """
 
-    name = "wisesight_sa_th"
+    name = "wisesight"
     description = "Wisesight sentiment analysis dataset"
     tags = ["sentiment_analysis"]
 
@@ -487,9 +483,7 @@ class Wisesight_SA_TH_Scenario(Scenario):
             target_path_file = os.path.join(data_path, "data", f"{split}.jsonl")
             df = pd.read_json(target_path_file, lines=True)
             df = df[df["category"] != "q"]
-            if split == 'train':
-                dataset[split] = df[df["texts"].apply(len) < df["texts"].apply(len).quantile(.2)]
-            else:
+            if split == 'test':
                 dataset[split] = df.groupby("category", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4183))
         return dataset
 
@@ -512,7 +506,7 @@ class Wisesight_SA_TH_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class UIT_VSFC_SA_VI_Scenario(Scenario):
+class UITVSFCScenario(Scenario):
     """
     This is a Vietnamese sentiment analysis scenario. The data consists of student feedback obtained from 
     end-of-semester surveys at a Vietnamese university. Feedback is labeled as one of three sentiment 
@@ -547,7 +541,7 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
     }
     """
 
-    name = "uit_vsfc_sa_vi"
+    name = "uitvsfc"
     description = "BHASA Vietnamese Students' Feedback Corpus for sentiment analysis"
     tags = ["sentiment_analysis"]
 
@@ -590,10 +584,7 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
                 "text": dataset[split]['sentences'],
                 "label": dataset[split]['sentiments']
             })
-            if split == 'train':
-                dataset[split] = data[data["text"].apply(len) < data["text"].apply(len).quantile(.2)]
-            else:
-                dataset[split] = data
+            dataset[split] = data
         return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -615,7 +606,7 @@ class UIT_VSFC_SA_VI_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
   
-class MLHSD_TD_ID_Scenario(Scenario):
+class MLHSDScenario(Scenario):
     """
     This is an Indonesian toxicity detection scenario. The data comes from the Indonesian Twitter Multi-label Hate Speech and 
     Abusive Language Detection Dataset.
@@ -625,7 +616,7 @@ class MLHSD_TD_ID_Scenario(Scenario):
         Anda adalah pendeteksi ujaran kebencian. Definisi dari labelnya adalah sebagai berikut:
         Bersih: Tidak ada ujaran kebencian.
         Kasar: Ada ujaran kebencian dan kata-kata kasar, namun tidak menyerang pihak tertentu.
-        Benci: Ada ujaran kebencian langsung atau serangan terhadap pihak tertentu.
+        Benci: Ada ujaran kebencian atau serangan langsung terhadap pihak tertentu.
         Berdasarkan definisi labelnya, klasifikasikan kalimat berikut ini dengan satu kata saja:
         - Bersih
         - Kasar
@@ -651,7 +642,7 @@ class MLHSD_TD_ID_Scenario(Scenario):
     }
     """
 
-    name = "mlhsd_td_id"
+    name = "mlhsd"
     description = "MLHSD toxicity detection dataset"
     tags = ["toxicity_dectection"]
 
@@ -670,7 +661,6 @@ class MLHSD_TD_ID_Scenario(Scenario):
         df['label'] = df.apply(lambda x: self.get_label(x), axis=1)
         df_test = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=7123))
         df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
-        df_train = df_train[df_train["Tweet"].apply(len) < df_train["Tweet"].apply(len).quantile(.2)]
         dataset = {
             'train': df_train,
             'test': df_test,
@@ -704,7 +694,7 @@ class MLHSD_TD_ID_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
+class ThaiToxicityTweetsScenario(Scenario):
     """
     This is a Thai toxicity detection scenario. The data comes from the Thai Toxicity Tweets dataset.
 
@@ -734,7 +724,7 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
     }
     """
 
-    name = "thai_toxicity_tweets_td_th"
+    name = "thaitoxicitytweets"
     description = "Thai Toxicity Tweets toxicity detection dataset"
     tags = ["toxicity_detection"]
 
@@ -756,7 +746,6 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
         df = df[df["tweet_text"]!= "TWEET_NOT_FOUND"]
         df_test = df.groupby("is_toxic", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
         df_train = df[~df.apply(tuple,1).isin(df_test.apply(tuple,1))]
-        df_train = df_train[df_train["tweet_text"].apply(len) < df_train["tweet_text"].apply(len).quantile(.2)]
         dataset = {
             'train': df_train,
             'test': df_test,
@@ -779,7 +768,7 @@ class Thai_Toxicity_Tweets_TD_TH_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class ViHSD_TD_VI_Scenario(Scenario):
+class ViHSDScenario(Scenario):
     """
     This is a Vietnamese toxicity detection scenario. The data comes from the ViHSD dataset.
 
@@ -816,7 +805,7 @@ class ViHSD_TD_VI_Scenario(Scenario):
     }
     """
 
-    name = "vihsd_td_vi"
+    name = "vihsd"
     description = "ViHSD toxicity detection dataset"
     tags = ["toxicity_detection"]
 
@@ -843,10 +832,7 @@ class ViHSD_TD_VI_Scenario(Scenario):
             target_path_file = os.path.join(data_path, "vihsd", f"{split}.csv")
             df = pd.read_csv(target_path_file)
             data = df.groupby("label_id", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4878))
-            if split == 'train':
-                dataset[split] = data[data["free_text"].apply(len) < data["free_text"].apply(len).quantile(.2)]
-            else:
-                dataset[split] = data
+            dataset[split] = data
         return dataset
 
     def get_instances(self, output_path) -> List[Instance]:
@@ -870,7 +856,7 @@ class ViHSD_TD_VI_Scenario(Scenario):
 
 # NLG
 
-class Flores_MT_Scenario(Scenario):
+class FloresScenario(Scenario):
     """
     This is the Flores machine translation scenario.
 
@@ -897,7 +883,7 @@ class Flores_MT_Scenario(Scenario):
 
     """
 
-    name = "flores_mt"
+    name = "flores"
     description = "Flores machine translation dataset"
     tags = ["machine_translation"]
 
@@ -929,8 +915,6 @@ class Flores_MT_Scenario(Scenario):
             source_df = source_dataset[split].to_pandas()
             target_df = target_dataset[split].to_pandas()
             data = source_df.join(target_df, lsuffix="_source", rsuffix="_target")
-            if split == 'train':
-                data = data[data["sentence_source"].apply(len) < data["sentence_source"].apply(len).quantile(.2)]
             for index, row in data.iterrows():
                 input = Input(row["sentence_source"].strip())
                 output = Output(row["sentence_target"].strip())
@@ -945,7 +929,7 @@ class Flores_MT_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class XLSum_AS_Scenario(Scenario):
+class XLSumScenario(Scenario):
     """
     This is the XLSum abstractive summarization scenario.
 
@@ -984,7 +968,7 @@ class XLSum_AS_Scenario(Scenario):
     }
     """
 
-    name = "xlsum_as"
+    name = "xlsum"
     description = "XLSum abstractive summarization dataset"
     tags = ["abstractive_summarization"]
 
@@ -1042,7 +1026,7 @@ class XLSum_AS_Scenario(Scenario):
 
 # NLR
 
-class IndicXNLI_NLI_TA_Scenario(Scenario):
+class IndicXNLIScenario(Scenario):
     """
     This is a Tamil natural language inference scenario. The data was automatically translated from XNLI into 11 Indic languages.
 
@@ -1080,7 +1064,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
     }
     """
 
-    name = "indicxnli_nli_ta"
+    name = "indicxnli"
     description = "IndicXNLI natural language inference dataset"
     tags = ["natural_language_inference"]
 
@@ -1103,7 +1087,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
         for split in self.splits.keys():
             df = dataset[split].to_pandas()
             if split == 'train':
-                data = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
+                data = df
             else:
                 data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
                 diff = df[~df.apply(tuple,1).isin(data.apply(tuple,1))]
@@ -1123,7 +1107,7 @@ class IndicXNLI_NLI_TA_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class IndoNLI_NLI_ID_Scenario(Scenario):
+class IndoNLIScenario(Scenario):
     """
     This is a IndoNLI natural language inference scenario. The data comes from IndoNLI, and incorporates various linguistic 
     phenomena such as numerical reasoning, structural changes, idioms, or temporal and spatial reasoning. Labels are
@@ -1136,7 +1120,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
         A: Kalau X benar, maka Y juga harus benar.
         B: X bertentangan dengan Y.
         C: Ketika X benar, Y mungkin benar atau mungkin tidak benar.
-        Jawablah dengan satu huruf A, B atau C saja.
+        Jawablah dengan satu huruf saja, A, B atau C.
 
         X: <sentence1>
         Y: <sentence2>
@@ -1164,7 +1148,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
     }
     """
 
-    name = "indonli_nli_id"
+    name = "indonli"
     description = "IndoNLI natural language inference dataset"
     tags = ["textual_entailment"]
 
@@ -1193,7 +1177,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
             ensure_file_downloaded(source_url=URLS[split], target_path=target_path_file)
             df = pd.read_json(target_path_file, lines=True)
             if split == 'train':
-                dataset[split] = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
+                dataset[split] = df
             else:
                 dataset[split] = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4685))
         return dataset
@@ -1218,7 +1202,7 @@ class IndoNLI_NLI_ID_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
         
-class XNLI_NLI_Scenario(Scenario):
+class XNLIScenario(Scenario):
     """
     This is a XNLI natural language inference scenario. The data comes from XNLI, and incorporates various linguistic 
     phenomena such as numerical reasoning, structural changes, idioms, or temporal and spatial reasoning. Labels are
@@ -1263,7 +1247,7 @@ class XNLI_NLI_Scenario(Scenario):
     }
     """
 
-    name = "xnli_nli"
+    name = "xnli"
     description = "XNLI natural language inference dataset"
     tags = ["textual_entailment"]
 
@@ -1286,7 +1270,7 @@ class XNLI_NLI_Scenario(Scenario):
         for split in self.splits.keys():
             df = dataset[split].to_pandas()
             if split == 'train':
-                data = df[df["premise"].apply(len) < df["premise"].apply(len).quantile(.2)]
+                data = df
             else:
                 data = df.groupby("label", group_keys=False).apply(lambda x: x.sample(frac=1000/len(df), random_state=4156))
                 diff = df[~df.apply(tuple,1).isin(data.apply(tuple,1))]
@@ -1306,7 +1290,7 @@ class XNLI_NLI_Scenario(Scenario):
                 outputs.append(instance)
         return outputs
 
-class XCOPA_CR_Scenario(Scenario):
+class XCOPAScenario(Scenario):
     """
     This is a XCOPA causal reasoning scenario. The data comes from XCOPA, a translation and reannotation of the English COPA.
 
@@ -1348,7 +1332,7 @@ class XCOPA_CR_Scenario(Scenario):
     }
     """
 
-    name = "xcopa_cr"
+    name = "xcopa"
     description = "XCOPA causal reasoning dataset"
     tags = ["causal_reasoning"]
 
@@ -1399,8 +1383,6 @@ class XCOPA_CR_Scenario(Scenario):
             language_df = language_dataset[split].to_pandas()
             tamil_df = tamil_dataset[split].to_pandas()
             data = pd.merge(language_df, tamil_df[['question', 'idx']], on='idx') # Use the Tamil split's question column
-            if split == 'train':
-                data = data[data["premise"].apply(len) < data["premise"].apply(len).quantile(.2)]
             for index, row in data.iterrows():
                 instruction1 = self.prompt[self.language]['instruction1'].format(self.prompt[self.language][row['question_y']])
                 passage = "{premise}\n{instruction1}\nA: {choice1}\nB: {choice2}\n{instruction2}".format(

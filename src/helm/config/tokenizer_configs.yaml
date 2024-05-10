@@ -335,3 +335,13 @@ tokenizer_configs:
       class_name: "helm.tokenizers.aisingapore_tokenizer.AISingaporeTokenizer"
     end_of_text_token: "<|endoftext|>"
     prefix_token: "<|endoftext|>"
+
+  # - name: aisingapore/sea-lion-7b-instruct
+  #   tokenizer_spec:
+  #     class_name: "helm.tokenizers.huggingface_tokenizer.HuggingFaceTokenizer"
+  #     args:
+  #       pretrained_model_name_or_path: aisingapore/sea-lion-7b-instruct
+  #       trust_remote_code: true
+  #       use_fast: true
+  #   end_of_text_token: "<|endoftext|>"
+  #   prefix_token: "<|endoftext|>"

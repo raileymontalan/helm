@@ -396,7 +396,34 @@ class MistralRunExpander(RunExpander):
                 ),
             ),
         ]
+    
+# class AISGRunExpander(RunExpander):
+#     """
+#     Custom prompt for Anthropic models.
+#     These models need more explicit instructions about following the format.
+#     """
 
+#     name = "aisg"
+
+#     def __init__(self):
+#         pass
+
+#     def expand(self, run_spec: RunSpec) -> List[RunSpec]:
+#         return [
+#             replace(
+#                 run_spec,
+#                 name=run_spec.name,
+#                 adapter_spec=replace(
+#                     run_spec.adapter_spec,
+#                     global_prefix=anthropic.HUMAN_PROMPT + " " + IN_CONTEXT_LEARNING_INSTRUCTIONS_PREFIX + "\n\n",
+#                     global_suffix="\n\n"
+#                     + IN_CONTEXT_LEARNING_INSTRUCTIONS_SUFFIX
+#                     + anthropic.AI_PROMPT
+#                     + " "
+#                     + run_spec.adapter_spec.output_prefix.strip(),
+#                 ),
+#             ),
+#         ]
 
 class IDEFICSInstructRunExpander(RunExpander):
     """
