@@ -561,6 +561,25 @@ model_deployments:
 
   # HuggingFace
 
+  ## AI Singapore
+  - name: huggingface/sea-lion-7b
+    model_name: aisingapore/sea-lion-7b
+    tokenizer_name: aisingapore/sea-lion-7b
+    max_sequence_length: 4096
+    client_spec:
+      class_name: "helm.clients.huggingface_client.HuggingFaceClient"
+      args:
+        trust_remote_code: true
+
+  - name: huggingface/sea-lion-7b-instruct
+    model_name: aisingapore/sea-lion-7b-instruct
+    tokenizer_name: aisingapore/sea-lion-7b
+    max_sequence_length: 4096
+    client_spec:
+      class_name: "helm.clients.huggingface_client.HuggingFaceClient"
+      args:
+        trust_remote_code: true
+
   ## Bigcode
   - name: huggingface/santacoder
     model_name: bigcode/santacoder
@@ -1642,7 +1661,7 @@ model_deployments:
     client_spec:
       class_name: "helm.clients.together_client.TogetherClient"
       args:
-        together_model: meta-llama/Meta-Llama-3-8B
+        together_model: meta-llama/Llama-3-8b-chat-hf
 
   - name: together/llama-3-70b-chat
     model_name: meta/llama-3-70b-chat
@@ -1651,7 +1670,7 @@ model_deployments:
     client_spec:
       class_name: "helm.clients.together_client.TogetherClient"
       args:
-        together_model: meta-llama/Meta-Llama-3-70B
+        together_model: meta-llama/Llama-3-70b-chat-hf
 
   # 01.AI
   - name: together/yi-6b
@@ -1679,7 +1698,7 @@ model_deployments:
     client_spec:
       class_name: "helm.clients.together_client.TogetherClient"
       args:
-        together_model: zero-one-ai/Yi-6B
+        together_model: zero-one-ai/Yi-6B-Chat
 
   - name: together/yi-34b-chat
     model_name: 01-ai/yi-34b-chat
@@ -1688,7 +1707,7 @@ model_deployments:
     client_spec:
       class_name: "helm.clients.together_client.TogetherClient"
       args:
-        together_model: zero-one-ai/Yi-34B
+        together_model: zero-one-ai/Yi-34B-Chat
 
 
   # Allen Institute for AI
