@@ -6,7 +6,7 @@ from helm.benchmark.adaptation.adapter_spec import (
     ADAPT_MULTIPLE_CHOICE_JOINT,
     ADAPT_MULTIPLE_CHOICE_SEPARATE_CALIBRATED,
     ADAPT_MULTIPLE_CHOICE_SEPARATE_ORIGINAL,
-    ADAPT_MULTIPLE_CHOICE_LANGUAGE_MODELING,
+    # ADAPT_MULTIPLE_CHOICE_LANGUAGE_MODELING,
     ADAPT_RANKING_BINARY,
     AdapterSpec,
 )
@@ -332,24 +332,24 @@ def get_language_modeling_adapter_spec() -> AdapterSpec:
     )
 
 
-def get_multiple_choice_language_modeling_adapter_spec() -> AdapterSpec:
-    """
-    Used for minimal pairs scenarios.
-    """
-    return AdapterSpec(
-        method=ADAPT_MULTIPLE_CHOICE_LANGUAGE_MODELING,
-        instructions="",
-        input_prefix="",
-        input_suffix="",
-        reference_prefix="",
-        reference_suffix="",
-        output_prefix="",
-        output_suffix="",
-        max_train_instances=0,
-        num_outputs=1,
-        max_tokens=0,
-        temperature=0.0,
-    )
+# def get_multiple_choice_language_modeling_adapter_spec() -> AdapterSpec:
+#     """
+#     Used for minimal pairs scenarios.
+#     """
+#     return AdapterSpec(
+#         method=ADAPT_MULTIPLE_CHOICE_LANGUAGE_MODELING,
+#         instructions="",
+#         input_prefix="",
+#         input_suffix="",
+#         reference_prefix="",
+#         reference_suffix="",
+#         output_prefix="",
+#         output_suffix="",
+#         max_train_instances=0,
+#         num_outputs=1,
+#         max_tokens=0,
+#         temperature=0.0,
+#     )
 
 
 def get_summarization_adapter_spec(num_sents: Optional[int], max_train_instances: int = 5, **kwargs) -> AdapterSpec:

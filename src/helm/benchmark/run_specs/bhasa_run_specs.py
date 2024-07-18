@@ -6,7 +6,7 @@ from helm.benchmark.adaptation.common_adapter_specs import (
     get_generation_adapter_spec,
     get_multiple_choice_separate_adapter_spec,
     get_multiple_choice_joint_adapter_spec,
-    get_multiple_choice_language_modeling_adapter_spec,
+    # get_multiple_choice_language_modeling_adapter_spec,
 )
 from helm.benchmark.metrics.bhasa_metrics_specs import (
     get_bhasa_machine_translation_metric_specs,
@@ -571,8 +571,8 @@ def get_lindsea_syntax_minimal_pairs_spec(language: str = "id", method: str = "m
             output_noun=output_prefix
         )
         # adapter_spec = get_generation_adapter_spec(output_noun=LINDSEA_OUTPUT_NOUNS[language], max_tokens=2)
-    elif method == "multiple_choice_language_modeling":
-        adapter_spec = get_multiple_choice_language_modeling_adapter_spec()
+    # elif method == "multiple_choice_language_modeling":
+    #     adapter_spec = get_multiple_choice_language_modeling_adapter_spec()
     elif method == "multiple_choice_separate_original":
         adapter_spec = get_multiple_choice_separate_adapter_spec(
             method=ADAPT_MULTIPLE_CHOICE_SEPARATE_ORIGINAL,
